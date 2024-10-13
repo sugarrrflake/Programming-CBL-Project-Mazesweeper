@@ -1,5 +1,10 @@
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.MouseListener;
+
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -10,10 +15,10 @@ import javax.swing.SwingUtilities;
  */
 public class Mazesweeper {
 
-    private JFrame frame;
+    JFrame frame;
     public Tile[][] maze;
 
-    public static final int TILE_SIZE = 75;
+    public static final int TILE_SIZE = 50;
 
     public static final Color LIGHT_GREEN = new Color(50, 215, 30);
     public static final Color DARK_GREEN = new Color(35, 150, 25);
@@ -27,9 +32,26 @@ public class Mazesweeper {
         this.maze = new Tile[10][10];
         this.frame = new JFrame("Mazesweeper");
         frame.setLayout(null);
-        frame.setSize(TILE_SIZE * 10, (TILE_SIZE * 10) + 100);
+        //frame.setSize(TILE_SIZE * 10, (TILE_SIZE * 10) + 100);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setResizable(false);
+        frame.setResizable(true);
+
+        frame.addComponentListener(new ComponentListener() {
+            @Override
+            public void componentHidden(ComponentEvent e) { }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {}
+
+            @Override
+            public void componentResized(ComponentEvent e) {
+                frame.pack();
+                System.out.println("resize: " + frame.getWidth() + ", " + frame.getHeight());
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {}
+            });
 
         JPanel inventoryPanel = new JPanel();
         inventoryPanel.setSize(TILE_SIZE * 10, 100);
@@ -47,8 +69,16 @@ public class Mazesweeper {
                 mazePanel.add(maze[i][j]);
             }
         }
-        frame.add(mazePanel);
+        //frame.add(mazePanel);
+        frame.getContentPane().add(mazePanel);
 
+
+        //frame.pack();
+        frame.setSize(TILE_SIZE * 10, (TILE_SIZE * 10) + 100);
+
+        System.out.println(frame.getWidth() + ", " + frame.getHeight());
+        System.out.println(inventoryPanel.getWidth() + ", " + inventoryPanel.getHeight());
+        System.out.println(mazePanel.getWidth() + ", " + mazePanel.getHeight());
         frame.setVisible(true);
     }
 
@@ -90,5 +120,28 @@ public class Mazesweeper {
             Mazesweeper game = new Mazesweeper();
 
         });
+    }
+}
+
+
+class ComponentMan implements ComponentListener {
+    @Override
+    public void componentHidden(ComponentEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+    @Override
+    public void componentMoved(ComponentEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+    @Override
+    public void componentResized(ComponentEvent e) {
+        
+    }
+    @Override
+    public void componentShown(ComponentEvent e) {
+        // TODO Auto-generated method stub
+        
     }
 }
