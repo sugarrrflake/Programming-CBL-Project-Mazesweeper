@@ -1,6 +1,7 @@
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridLayout;
-import javax.swing.BoxLayout;
+import java.awt.Toolkit;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -13,7 +14,7 @@ public class Mazesweeper {
     private JFrame frame;
     public Tile[][] maze;
 
-    public static final int TILE_SIZE = 75;
+    public static final int TILE_SIZE = (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 15;
 
     public static final Color LIGHT_GREEN = new Color(50, 215, 30);
     public static final Color DARK_GREEN = new Color(35, 150, 25);
@@ -26,8 +27,9 @@ public class Mazesweeper {
 
         this.maze = new Tile[10][10];
         this.frame = new JFrame("Mazesweeper");
+
         frame.setLayout(null);
-        frame.setSize(TILE_SIZE * 10, (TILE_SIZE * 10) + 100);
+        frame.setSize((TILE_SIZE * 10) + 16, (TILE_SIZE * 10) + 139);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
 
