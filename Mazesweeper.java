@@ -85,14 +85,5 @@ public class Mazesweeper {
                 }
             }
         }
-
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-
-            Mazesweeper game = new Mazesweeper();
-
-        });
     }
 }
