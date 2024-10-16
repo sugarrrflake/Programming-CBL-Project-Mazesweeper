@@ -49,7 +49,6 @@ public class Mazesweeper implements MouseListener {
         mazePanel.setSize(TILE_SIZE * 10, TILE_SIZE * 10);
         mazePanel.setLayout(new GridLayout(10, 10));
         mazePanel.setLocation(0, 100);
-        mazePanel.addMouseListener(this);
         mazeInit();
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
@@ -69,7 +68,7 @@ public class Mazesweeper implements MouseListener {
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
 
-                maze[i][j] = new Tile(false);
+                maze[i][j] = new Tile(false, i, j);
                 maze[i][j].setSize(TILE_SIZE, TILE_SIZE);
 
                 // Set the color each tile depending on its position:
@@ -107,10 +106,10 @@ public class Mazesweeper implements MouseListener {
      * Spawns a player at the click location if there is no player yet.
      * Otherwise //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//
      * 
-     * @param e mouse click
+     * @param e mouse pressed down
      */
     public void mousePressed(MouseEvent e) {
-
+        System.out.println(e.getX() + " " + e.getY());
         if (this.player == null) {
             Point spawPoint = new Point(e.getX(), e.getY());
             this.player = new Player(spawPoint);
