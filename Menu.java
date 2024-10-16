@@ -84,8 +84,7 @@ class StartButtonEventHandler implements ActionListener {
         SwingUtilities.invokeLater(() -> {
 
             Mazesweeper game = new Mazesweeper();
-            game.runGame();
-
+            
         });
     }
 }

@@ -1,3 +1,4 @@
+import java.awt.Point;
 import java.awt.event.*;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -11,7 +12,7 @@ public class Tile extends JPanel implements MouseListener {
     private final int col;
     private boolean hasMine;
     
-    private static boolean playerSpawned = false;
+    public static Point playerSpawn = null;
 
     /**
      * Initiates a tile, with or without a mine.
@@ -52,9 +53,9 @@ public class Tile extends JPanel implements MouseListener {
     }
 
     public void mousePressed(MouseEvent e) {
-        if (!playerSpawned) {
+        if (playerSpawn == null) {
             System.out.println(this.row + " " + this.col);
-            playerSpawned = true;
+            playerSpawn = new Point(this.row, this.col);
         } else {
             System.out.println("player already spawned");
         }

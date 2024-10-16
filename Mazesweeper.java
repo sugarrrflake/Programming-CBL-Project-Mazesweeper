@@ -11,12 +11,18 @@ import javax.swing.SwingUtilities;
 /**
  * Main class implementing the Mazesweeper game.
  */
-public class Mazesweeper implements MouseListener {
+public class Mazesweeper {
  
     private JFrame frame;
     private JPanel inventoryPanel;
     private Tile[][] maze;
-    private Player player = null;
+    //private Player player = null;
+
+    private Point playerLocation = null;
+    
+    private boolean defuser = true;
+    private boolean radar = true;
+    private boolean swapper = true;
     
 
     public static final int TILE_SIZE = (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 15;
@@ -95,33 +101,78 @@ public class Mazesweeper implements MouseListener {
      * Runs a fresh game of Mazesweeper.
      */
     public void runGame() {
-
+        SwingUtilities.invokeLater(() -> {
+            
+        });
     }
 
-    public void mouseEntered(MouseEvent e) {}
 
-    public void mouseExited(MouseEvent e) {}
 
-    /**
-     * Spawns a player at the click location if there is no player yet.
-     * Otherwise //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//
-     * 
-     * @param e mouse pressed down
-     */
-    public void mousePressed(MouseEvent e) {
-        System.out.println(e.getX() + " " + e.getY());
-        if (this.player == null) {
-            Point spawPoint = new Point(e.getX(), e.getY());
-            this.player = new Player(spawPoint);
-            System.out.println(this.player.getLocation().getX() + " ");
-            System.out.println(this.player.getLocation().getY());
-        } else {
 
+
+
+
+
+
+
+
+
+
+    class Tile extends JPanel implements MouseListener {
+
+        private final int row;
+        private final int col;
+        private boolean hasMine;
+        
+        /**
+         * Initiates a tile, with or without a mine.
+         * 
+         * @param hasMine does the tile have a mine on it or not
+         * @param row the row coordinate of the tile
+         * @param col the column coordinate of the tile
+         */
+        public Tile(boolean hasMine, int row, int col) {
+            this.hasMine = hasMine;
+            this.row = row;
+            this.col = col;
+            this.addMouseListener(this);
         }
-
+    
+        public boolean getHasMine() {
+            return this.hasMine;
+        }
+    
+        public void plantMine() {
+            this.hasMine = true;
+        }
+    
+        public int getRow() {
+            return this.row;
+        }
+    
+        public int getCol() {
+            return this.col;
+        }
+    
+        public void mouseEntered(MouseEvent e) {
+            this.setBorder(BorderFactory.createLoweredBevelBorder());
+        }
+    
+        public void mouseExited(MouseEvent e) {
+            this.setBorder(BorderFactory.createEmptyBorder());
+        }
+    
+        public void mousePressed(MouseEvent e) {
+            if (playerLocation == null) {
+                playerLocation = new Point(this.row, this.col);
+                runGame();
+            } else {
+                System.out.println("player already spawned");
+            }
+        }
+    
+        public void mouseReleased(MouseEvent e) {}
+    
+        public void mouseClicked(MouseEvent e) {}
     }
-
-    public void mouseReleased(MouseEvent e) {}
-
-    public void mouseClicked(MouseEvent e) {}
 }
