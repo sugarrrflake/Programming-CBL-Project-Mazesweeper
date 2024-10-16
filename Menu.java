@@ -59,27 +59,34 @@ public class Menu {
     }
 
 
+    public static void hideFrame() {
+        frame.setVisible(false);
+    }
+    
+    public static void showFrame() {
+        frame.setVisible(true);
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
 
-            //Mazesweeper game = new Mazesweeper();
             Menu startMenu = new Menu();
 
         });
     }
-
-    public static void hideFrame() {
-        frame.setVisible(false);
-    }
 }
-
 
 class StartButtonEventHandler implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
         Menu.hideFrame();
-        Mazesweeper game = new Mazesweeper();
+        SwingUtilities.invokeLater(() -> {
+
+            Mazesweeper game = new Mazesweeper();
+            game.runGame();
+
+        });
     }
 }
 

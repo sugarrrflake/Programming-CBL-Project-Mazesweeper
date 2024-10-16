@@ -1,6 +1,8 @@
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.event.*;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -9,11 +11,13 @@ import javax.swing.SwingUtilities;
 /**
  * Main class implementing the Mazesweeper game.
  */
-public class Mazesweeper {
-
+public class Mazesweeper implements MouseListener {
+ 
     private JFrame frame;
-    public JPanel inventoryPanel;
-    public Tile[][] maze;
+    private JPanel inventoryPanel;
+    private Tile[][] maze;
+    private Player player = null;
+    
 
     public static final int TILE_SIZE = (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 15;
 
@@ -45,6 +49,7 @@ public class Mazesweeper {
         mazePanel.setSize(TILE_SIZE * 10, TILE_SIZE * 10);
         mazePanel.setLayout(new GridLayout(10, 10));
         mazePanel.setLocation(0, 100);
+        mazePanel.addMouseListener(this);
         mazeInit();
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
@@ -86,4 +91,38 @@ public class Mazesweeper {
             }
         }
     }
+
+    /**
+     * Runs a fresh game of Mazesweeper.
+     */
+    public void runGame() {
+
+    }
+
+    public void mouseEntered(MouseEvent e) {}
+
+    public void mouseExited(MouseEvent e) {}
+
+    /**
+     * Spawns a player at the click location if there is no player yet.
+     * Otherwise //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//
+     * 
+     * @param e mouse click
+     */
+    public void mousePressed(MouseEvent e) {
+
+        if (this.player == null) {
+            Point spawPoint = new Point(e.getX(), e.getY());
+            this.player = new Player(spawPoint);
+            System.out.println(this.player.getLocation().getX() + " ");
+            System.out.println(this.player.getLocation().getY());
+        } else {
+
+        }
+
+    }
+
+    public void mouseReleased(MouseEvent e) {}
+
+    public void mouseClicked(MouseEvent e) {}
 }
