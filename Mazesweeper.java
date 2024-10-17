@@ -34,6 +34,12 @@ public class Mazesweeper {
     private final MoveRight moveRight;
     private final MoveLeft moveLeft;
 
+    private final LookUp lookUp;
+    private final LookDown lookDown;
+    private final LookRight lookRight;
+    private final LookLeft lookLeft;
+
+
     public static final Dimension SCREEN_DIMENSION = Toolkit.getDefaultToolkit().getScreenSize();
 
     public static final int TILE_SIZE = SCREEN_DIMENSION.height / 15;
@@ -54,6 +60,11 @@ public class Mazesweeper {
         this.moveDown = new MoveDown();
         this.moveRight = new MoveRight();
         this.moveLeft = new MoveLeft();
+
+        this.lookUp = new LookUp();
+        this.lookDown = new LookDown();
+        this.lookRight = new LookRight();
+        this.lookLeft = new LookLeft();
         
         frame.setLayout(null);
         int frameWidth = (TILE_SIZE * 10) + 16;
@@ -83,6 +94,7 @@ public class Mazesweeper {
             }
         }
 
+        // Movement action input keys
         mazePanel.getInputMap().put(KeyStroke.getKeyStroke("W"), "moveUP");
         mazePanel.getActionMap().put("moveUP", this.moveUp);
 
@@ -94,6 +106,19 @@ public class Mazesweeper {
 
         mazePanel.getInputMap().put(KeyStroke.getKeyStroke("A"), "moveLEFT");
         mazePanel.getActionMap().put("moveLEFT", this.moveLeft);
+
+        // Other action input keys
+        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("UP"), "lookUP");
+        mazePanel.getActionMap().put("lookUP", this.lookUp);
+
+        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("DOWN"), "lookDOWN");
+        mazePanel.getActionMap().put("lookDOWN", this.lookDown);
+
+        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("LEFT"), "lookLEFT");
+        mazePanel.getActionMap().put("lookLEFT", this.lookLeft);
+
+        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("RIGHT"), "lookRIGHT");
+        mazePanel.getActionMap().put("lookRIGHT", this.lookRight);
 
         frame.add(mazePanel);
 
@@ -199,7 +224,44 @@ public class Mazesweeper {
 
         }
 
+        // De-select tile if one was selected
+        for (Tile[] row : maze) {
+            for (Tile col : row) {
+                col.selected = false;
+                col.repaint();
+            }
+        }
+    }
 
+    public void look(String direction) {
+
+        Point selectedTile = null;
+        switch (direction) {
+            case "UP" -> 
+                selectedTile = new Point(player.currentLocation.x - 1, player.currentLocation.y);
+            case "DOWN" -> 
+                selectedTile = new Point(player.currentLocation.x + 1, player.currentLocation.y);
+            case "RIGHT" -> 
+                selectedTile = new Point(player.currentLocation.x, player.currentLocation.y + 1);
+            case "LEFT" -> 
+                selectedTile = new Point(player.currentLocation.x, player.currentLocation.y - 1);
+            default -> { }
+        }
+
+        // De-select other tiles
+        for (Tile[] row : maze) {
+            for (Tile col : row) {
+                col.selected = false;
+                col.repaint();
+            }
+        }
+
+        // set the selected tile and paint it a different colour
+        if (selectedTile != null) {
+            maze[selectedTile.x][selectedTile.y].selected = true;
+            maze[selectedTile.x][selectedTile.y].repaint();
+        }
+            
     }
 
     class ReturnToMenu implements ActionListener {
@@ -258,6 +320,54 @@ public class Mazesweeper {
         }
     }
 
+    /**
+     * Detecting that the player wants to perform an action on the tile above them.
+     */
+    class LookUp extends AbstractAction {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (player.currentLocation.x > 0) {
+                look("UP");
+            }
+        }
+    }
+
+    /**
+     * Detecting that the player wants to perform an action on the tile above them.
+     */
+    class LookDown extends AbstractAction {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (player.currentLocation.x > 0) {
+                look("DOWN");
+            }
+        }
+    }
+
+    /**
+     * Detecting that the player wants to perform an action on the tile above them.
+     */
+    class LookLeft extends AbstractAction {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (player.currentLocation.x > 0) {
+                look("LEFT");
+            }
+        }
+    }
+
+    /**
+     * Detecting that the player wants to perform an action on the tile above them.
+     */
+    class LookRight extends AbstractAction {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (player.currentLocation.x > 0) {
+                look("RIGHT");
+            }
+        }
+    }
+
 
 
 
@@ -277,6 +387,7 @@ public class Mazesweeper {
 
         private boolean hasMine;
         private boolean hasPlayer = false;
+        private boolean selected = false;
 
         private final Color mainColor;
 
@@ -288,11 +399,11 @@ public class Mazesweeper {
          * @param row the row coordinate of the tile
          * @param col the column coordinate of the tile
          */
-        public Tile(boolean hasMine, int row, int col, Color maianColor) {
+        public Tile(boolean hasMine, int row, int col, Color mainColor) {
             this.hasMine = hasMine;
             this.row = row;
             this.col = col;
-            this.mainColor = maianColor;
+            this.mainColor = mainColor;
             this.addMouseListener(this);
         }
     
@@ -309,6 +420,9 @@ public class Mazesweeper {
             super.paintComponent(g);
             if (this.hasPlayer) {
                 this.setBackground(Color.MAGENTA);
+            } else if (this.selected) {
+                this.setBackground(Color.CYAN);
+                System.out.println();
             } else {
                 this.setBackground(mainColor);
             }
