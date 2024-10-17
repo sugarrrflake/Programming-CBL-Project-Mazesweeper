@@ -1,9 +1,14 @@
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 
@@ -12,11 +17,16 @@ import javax.swing.SwingUtilities;
  */
 public class Menu {
 
-
     private static JFrame frame = new JFrame("Mazesweeper Startup");
+
+    // button ActionListeners
     StartButtonEventHandler startListener = new StartButtonEventHandler();
     RulesButtonEventHandler rulesListener = new RulesButtonEventHandler();
     QuitButtonEventHandler quitListener = new QuitButtonEventHandler();
+
+    // button layout constraints. Used to configure the layout manager.
+    GridBagConstraints constraints = new GridBagConstraints();
+
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
     /**
@@ -24,7 +34,8 @@ public class Menu {
      */
     public Menu() {
         
-        frame.setLayout(null);
+        // frame init
+        frame.setLayout(new GridBagLayout());
         //sets window size relative to user's screen size
         frame.setSize((int) Math.round(screenSize.getWidth() / 1.6), 
             (int) Math.round(screenSize.getHeight() / 1.6));
@@ -32,26 +43,28 @@ public class Menu {
         frame.setResizable(false);
         frame.getContentPane().setBackground(Mazesweeper.DARK_GREEN);
 
+
+        // start button init
         JButton startButton = new JButton("START");
         startButton.setBackground(Mazesweeper.LIGHT_GREEN);
-        startButton.setSize(200, 50);
-        startButton.setLocation(0, 0);
         startButton.addActionListener(startListener);
-        frame.add(startButton);
+        constraints.insets = new Insets(150, 10, 10, 10);
+        frame.add(startButton, constraints);
 
+        // rules button init
         JButton rulesButton = new JButton("HOW TO PLAY");
         rulesButton.setBackground(Mazesweeper.LIGHT_GREEN);
-        rulesButton.setSize(200, 50);
-        rulesButton.setLocation(200, 50);
         rulesButton.addActionListener(rulesListener);
-        frame.add(rulesButton);
+        constraints.insets.top = 10;
+        constraints.gridy = 1;
+        frame.add(rulesButton, constraints);
 
+        // quit button init
         JButton quitButton = new JButton("QUIT");
         quitButton.setBackground(Mazesweeper.LIGHT_GREEN);
-        quitButton.setSize(200, 50);
-        quitButton.setLocation(400, 100);
         quitButton.addActionListener(quitListener);
-        frame.add(quitButton);
+        constraints.gridy = 2;
+        frame.add(quitButton, constraints);
 
 
 
@@ -73,7 +86,7 @@ public class Menu {
     }
 }
 
-
+// start game when start is pressed
 class StartButtonEventHandler implements ActionListener {
 
     @Override
@@ -83,6 +96,7 @@ class StartButtonEventHandler implements ActionListener {
     }
 }
 
+// show rules screen when "how to play" is pressed
 class RulesButtonEventHandler implements ActionListener {
 
     @Override
@@ -92,6 +106,7 @@ class RulesButtonEventHandler implements ActionListener {
     }
 }
 
+// exit program when quit is pressed
 class QuitButtonEventHandler implements ActionListener {
 
     @Override
