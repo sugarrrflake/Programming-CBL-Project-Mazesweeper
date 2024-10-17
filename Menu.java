@@ -80,8 +80,9 @@ class StartButtonEventHandler implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Menu.hideFrame();
         SwingUtilities.invokeLater(() -> {
+
+            Menu.hideFrame();
 
             Mazesweeper game = new Mazesweeper();
             
