@@ -76,6 +76,7 @@ public class Menu {
     }
 }
 
+// start game when start is pressed
 class StartButtonEventHandler implements ActionListener {
 
     @Override
