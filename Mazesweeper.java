@@ -1,4 +1,8 @@
 import java.awt.Color;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Point;
@@ -6,10 +10,14 @@ import java.awt.Toolkit;
 import java.awt.event.*;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 /**
  * Main class implementing the Mazesweeper game.
@@ -26,7 +34,9 @@ public class Mazesweeper {
     private final MoveRight moveRight;
     private final MoveLeft moveLeft;
 
-    public static final int TILE_SIZE = (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 15;
+    public static final Dimension SCREEN_DIMENSION = Toolkit.getDefaultToolkit().getScreenSize();
+
+    public static final int TILE_SIZE = SCREEN_DIMENSION.height / 15;
 
     public static final Color LIGHT_GREEN = new Color(50, 215, 30);
     public static final Color DARK_GREEN = new Color(35, 150, 25);
@@ -46,7 +56,12 @@ public class Mazesweeper {
         this.moveLeft = new MoveLeft();
         
         frame.setLayout(null);
-        frame.setSize((TILE_SIZE * 10) + 16, (TILE_SIZE * 10) + 139);
+        int frameWidth = (TILE_SIZE * 10) + 16;
+        int frameHeight = (TILE_SIZE * 10) + 139;
+        frame.setSize(frameWidth, frameHeight);
+        int frameX = (SCREEN_DIMENSION.width - frameWidth) / 2;
+        int frameY = (SCREEN_DIMENSION.height - frameHeight) / 2;
+        frame.setLocation(frameX, frameY);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
 
@@ -97,7 +112,7 @@ public class Mazesweeper {
                 // Dark  - Light - Dark ...
                 if (i % 2 == 0) {
                     if (j % 2 == 0) {
-                        maze[i][j] = new Tile(false, i, j, LIGHT_GREEN);
+                        maze[i][j] = new Tile(true, i, j, LIGHT_GREEN);
                         maze[i][j].setSize(TILE_SIZE, TILE_SIZE);
                         maze[i][j].setBackground(LIGHT_GREEN);
                     } else {
@@ -111,7 +126,7 @@ public class Mazesweeper {
                         maze[i][j].setSize(TILE_SIZE, TILE_SIZE);
                         maze[i][j].setBackground(DARK_GREEN);
                     } else {
-                        maze[i][j] = new Tile(false, i, j, LIGHT_GREEN);
+                        maze[i][j] = new Tile(true, i, j, LIGHT_GREEN);
                         maze[i][j].setSize(TILE_SIZE, TILE_SIZE);
                         maze[i][j].setBackground(LIGHT_GREEN);
                     }
@@ -121,118 +136,127 @@ public class Mazesweeper {
     }
 
     /**
-     * Runs a fresh game of Mazesweeper.
+     * Moving the player on tile in a given direction.
+     * 
+     * @param direction the direction the player wants to move
      */
-    public void runGame() {
-        SwingUtilities.invokeLater(() -> {
+    public void move(String direction) {
 
-        });
+
+        player.oldLocation = player.currentLocation;
+        Point newLocation = null;
+
+        switch (direction) {
+            case "UP" -> 
+                newLocation = new Point(player.currentLocation.x - 1, player.currentLocation.y);
+            case "DOWN" -> 
+                newLocation = new Point(player.currentLocation.x + 1, player.currentLocation.y);
+            case "RIGHT" -> 
+                newLocation = new Point(player.currentLocation.x, player.currentLocation.y + 1);
+            case "LEFT" -> 
+                newLocation = new Point(player.currentLocation.x, player.currentLocation.y - 1);
+            default -> { }
+        }
+
+        player.currentLocation = newLocation;
+
+        maze[player.oldLocation.x][player.oldLocation.y].hasPlayer = false;
+        maze[player.currentLocation.x][player.currentLocation.y].hasPlayer = true;
+
+        maze[player.oldLocation.x][player.oldLocation.y].repaint();
+        maze[player.currentLocation.x][player.currentLocation.y].repaint();
+            
+        if (maze[player.currentLocation.x][player.currentLocation.y].hasMine) {
+            JDialog gameOver = new JDialog(frame, "Game Over!", Dialog.ModalityType.DOCUMENT_MODAL);
+
+            int overWidth = SCREEN_DIMENSION.width / 5;
+            int overHeight = SCREEN_DIMENSION.height / 5;
+            int overX = (SCREEN_DIMENSION.width - overWidth) / 2;
+            int overY = (SCREEN_DIMENSION.height - overHeight) / 2;
+
+            gameOver.setLocation(overX, overY);
+            gameOver.setSize(overWidth, overHeight);
+            gameOver.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+            gameOver.setLayout(new FlowLayout());
+
+            JLabel gameOverText = new JLabel("Game Over!");
+            gameOverText.setFont(new Font("Sans_Serif", Font.BOLD, overHeight / 4));
+            gameOver.add(gameOverText);
+
+            JLabel mineText = new JLabel("You stepped on a mine");
+            mineText.setFont(new Font("Sans_Serif", Font.ITALIC, overHeight / 8));
+            gameOver.add(mineText);
+
+            gameOver.add(Box.createHorizontalStrut(overWidth));
+
+            JButton menuReturn = new JButton("Return to main menu");
+            menuReturn.setFont(new Font("Sans_Serif", Font.PLAIN, overHeight / 10));
+            ReturnToMenu returnToMenu = new ReturnToMenu();
+            menuReturn.addActionListener(returnToMenu);
+            gameOver.add(menuReturn);
+
+            gameOver.setVisible(true);
+
+        }
+
+
     }
 
-
-
-
-
-
-
-
-
-
-
+    class ReturnToMenu implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            frame.dispose();
+            Menu.showFrame();
+        }
+    }
 
     /**
-     * Moving the player charater up one tile.
+     * Detecting that the player wants to move upwards.
      */
     class MoveUp extends AbstractAction {
-
         @Override
         public void actionPerformed(ActionEvent e) {
             if (player.currentLocation.x > 0) {
-                player.oldLocation = player.currentLocation;
-
-                Point newLocation = new Point(player.currentLocation.x - 1, player.currentLocation.y);
-    
-                player.currentLocation = newLocation;
-    
-                maze[player.oldLocation.x][player.oldLocation.y].hasPlayer = false;
-                maze[player.currentLocation.x][player.currentLocation.y].hasPlayer = true;
-
-                maze[player.oldLocation.x][player.oldLocation.y].repaint();
-                maze[player.currentLocation.x][player.currentLocation.y].repaint();
+                move("UP");
             }
         }
     }
 
     /**
-     * Moving the player charater down one tile.
+     * Detecting that the player wants to move downwards.
      */
     class MoveDown extends AbstractAction {
-
         @Override
         public void actionPerformed(ActionEvent e) {
             if (player.currentLocation.x < 9) {
-                player.oldLocation = player.currentLocation;
-
-                Point newLocation = new Point(player.currentLocation.x + 1, player.currentLocation.y);
-    
-                player.currentLocation = newLocation;
-    
-                maze[player.oldLocation.x][player.oldLocation.y].hasPlayer = false;
-                maze[player.currentLocation.x][player.currentLocation.y].hasPlayer = true;
-                                
-                maze[player.oldLocation.x][player.oldLocation.y].repaint();
-                maze[player.currentLocation.x][player.currentLocation.y].repaint();
+                move("DOWN");
             }
         }
     }
 
     /**
-     * Moving the player charater right one tile.
+     * Detecting that the player wants to move right.
      */
     class MoveRight extends AbstractAction {
-
         @Override
         public void actionPerformed(ActionEvent e) {
             if (player.currentLocation.y < 9) {
-                player.oldLocation = player.currentLocation;
-
-                Point newLocation = new Point(player.currentLocation.x, player.currentLocation.y + 1);
-    
-                player.currentLocation = newLocation;
-    
-                maze[player.oldLocation.x][player.oldLocation.y].hasPlayer = false;
-                maze[player.currentLocation.x][player.currentLocation.y].hasPlayer = true;
-                                
-                maze[player.oldLocation.x][player.oldLocation.y].repaint();
-                maze[player.currentLocation.x][player.currentLocation.y].repaint();
+                move("RIGHT");
             }
         }
     }
 
     /**
-     * Moving the player charater left one tile.
+     * Detecting that the player wants to move left.
      */
     class MoveLeft extends AbstractAction {
-
         @Override
         public void actionPerformed(ActionEvent e) {
             if (player.currentLocation.y > 0) {
-                player.oldLocation = player.currentLocation;
-
-                Point newLocation = new Point(player.currentLocation.x, player.currentLocation.y - 1);
-    
-                player.currentLocation = newLocation;
-    
-                maze[player.oldLocation.x][player.oldLocation.y].hasPlayer = false;
-                maze[player.currentLocation.x][player.currentLocation.y].hasPlayer = true;
-                                
-                maze[player.oldLocation.x][player.oldLocation.y].repaint();
-                maze[player.currentLocation.x][player.currentLocation.y].repaint();
+                move("LEFT");
             }
         }
     }
-
-
 
 
 
