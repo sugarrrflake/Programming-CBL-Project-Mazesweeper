@@ -47,7 +47,6 @@ public class Menu {
      * Sets up the start menu screen.
      */
     public Menu() {
-        System.out.println(buttonWidth + ", " + buttonFontSize);
         // frame init
         frame.setLayout(new GridBagLayout());
         //sets window size relative to user's screen size
