@@ -68,16 +68,16 @@ public class Mazesweeper {
             }
         }
 
-        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("UP"), "moveUP");
+        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("W"), "moveUP");
         mazePanel.getActionMap().put("moveUP", this.moveUp);
 
-        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("DOWN"), "moveDOWN");
+        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("S"), "moveDOWN");
         mazePanel.getActionMap().put("moveDOWN", this.moveDown);
 
-        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("RIGHT"), "moveRIGHT");
+        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("D"), "moveRIGHT");
         mazePanel.getActionMap().put("moveRIGHT", this.moveRight);
 
-        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("LEFT"), "moveLEFT");
+        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("A"), "moveLEFT");
         mazePanel.getActionMap().put("moveLEFT", this.moveLeft);
 
         frame.add(mazePanel);
