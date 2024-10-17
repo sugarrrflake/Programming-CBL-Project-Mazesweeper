@@ -129,6 +129,17 @@ public class Mazesweeper {
         });
     }
 
+
+
+
+
+
+
+
+
+
+
+
     /**
      * Moving the player charater up one tile.
      */
@@ -145,6 +156,9 @@ public class Mazesweeper {
     
                 maze[player.oldLocation.x][player.oldLocation.y].hasPlayer = false;
                 maze[player.currentLocation.x][player.currentLocation.y].hasPlayer = true;
+
+                maze[player.oldLocation.x][player.oldLocation.y].repaint();
+                maze[player.currentLocation.x][player.currentLocation.y].repaint();
             }
         }
     }
@@ -165,6 +179,9 @@ public class Mazesweeper {
     
                 maze[player.oldLocation.x][player.oldLocation.y].hasPlayer = false;
                 maze[player.currentLocation.x][player.currentLocation.y].hasPlayer = true;
+                                
+                maze[player.oldLocation.x][player.oldLocation.y].repaint();
+                maze[player.currentLocation.x][player.currentLocation.y].repaint();
             }
         }
     }
@@ -185,6 +202,9 @@ public class Mazesweeper {
     
                 maze[player.oldLocation.x][player.oldLocation.y].hasPlayer = false;
                 maze[player.currentLocation.x][player.currentLocation.y].hasPlayer = true;
+                                
+                maze[player.oldLocation.x][player.oldLocation.y].repaint();
+                maze[player.currentLocation.x][player.currentLocation.y].repaint();
             }
         }
     }
@@ -205,9 +225,22 @@ public class Mazesweeper {
     
                 maze[player.oldLocation.x][player.oldLocation.y].hasPlayer = false;
                 maze[player.currentLocation.x][player.currentLocation.y].hasPlayer = true;
+                                
+                maze[player.oldLocation.x][player.oldLocation.y].repaint();
+                maze[player.currentLocation.x][player.currentLocation.y].repaint();
             }
         }
     }
+
+
+
+
+
+
+
+
+
+
 
 
     /**
