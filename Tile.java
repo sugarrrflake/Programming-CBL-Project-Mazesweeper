@@ -1,3 +1,4 @@
+import java.awt.Point;
 import java.awt.event.*;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -7,15 +8,23 @@ import javax.swing.JPanel;
  */
 public class Tile extends JPanel implements MouseListener {
 
-    private final boolean hasMine;
+    private final int row;
+    private final int col;
+    private boolean hasMine;
+    
+    public static Point playerSpawn = null;
 
     /**
      * Initiates a tile, with or without a mine.
      * 
      * @param hasMine does the tile have a mine on it or not
+     * @param row the row coordinate of the tile
+     * @param col the column coordinate of the tile
      */
-    public Tile(boolean hasMine) {
+    public Tile(boolean hasMine, int row, int col) {
         this.hasMine = hasMine;
+        this.row = row;
+        this.col = col;
         this.addMouseListener(this);
     }
 
@@ -23,15 +32,34 @@ public class Tile extends JPanel implements MouseListener {
         return this.hasMine;
     }
 
+    public void plantMine() {
+        this.hasMine = true;
+    }
+
+    public int getRow() {
+        return this.row;
+    }
+
+    public int getCol() {
+        return this.col;
+    }
+
     public void mouseEntered(MouseEvent e) {
         this.setBorder(BorderFactory.createLoweredBevelBorder());
     }
 
     public void mouseExited(MouseEvent e) {
-        this.setBorder(BorderFactory.createEmptyBorder());;
+        this.setBorder(BorderFactory.createEmptyBorder());
     }
 
-    public void mousePressed(MouseEvent e) {}
+    public void mousePressed(MouseEvent e) {
+        if (playerSpawn == null) {
+            System.out.println(this.row + " " + this.col);
+            playerSpawn = new Point(this.row, this.col);
+        } else {
+            System.out.println("player already spawned");
+        }
+    }
 
     public void mouseReleased(MouseEvent e) {}
 
