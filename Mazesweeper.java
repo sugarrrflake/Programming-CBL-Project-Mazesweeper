@@ -17,6 +17,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 /**
@@ -144,7 +145,7 @@ public class Mazesweeper {
                 // Dark  - Light - Dark ...
                 if (i % 2 == 0) {
                     if (j % 2 == 0) {
-                        maze[i][j] = new Tile(true, i, j, LIGHT_GREEN);
+                        maze[i][j] = new Tile(false, i, j, LIGHT_GREEN);
                         maze[i][j].setSize(TILE_SIZE, TILE_SIZE);
                         maze[i][j].setBackground(LIGHT_GREEN);
                     } else {
@@ -158,7 +159,7 @@ public class Mazesweeper {
                         maze[i][j].setSize(TILE_SIZE, TILE_SIZE);
                         maze[i][j].setBackground(DARK_GREEN);
                     } else {
-                        maze[i][j] = new Tile(true, i, j, LIGHT_GREEN);
+                        maze[i][j] = new Tile(false, i, j, LIGHT_GREEN);
                         maze[i][j].setSize(TILE_SIZE, TILE_SIZE);
                         maze[i][j].setBackground(LIGHT_GREEN);
                     }
@@ -465,9 +466,11 @@ public class Mazesweeper {
     
         @Override
         public void mousePressed(MouseEvent e) {
-            if (player == null) {
+            if (SwingUtilities.isLeftMouseButton(e) && player == null) {
                 player = new Player(new Point(this.row, this.col));
                 this.hasPlayer = true;
+            } else if (SwingUtilities.isRightMouseButton(e)) { //TODO right click spawns mine for debug
+                this.hasMine = true;
             } else {
                 System.out.println("player already spawned");
             }
