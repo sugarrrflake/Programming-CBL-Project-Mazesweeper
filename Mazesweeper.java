@@ -51,6 +51,8 @@ public class Mazesweeper {
 
     public static final Color LIGHT_GREEN = new Color(50, 215, 30);
     public static final Color DARK_GREEN = new Color(35, 150, 25);
+    public static final Color LIGHT_BEIGE = new Color(231, 229, 131);
+    public static final Color DARK_BEIGE = new Color(216, 214, 119);
 
     /**
      * Constructor for the main Mazesweeper game.
@@ -207,6 +209,7 @@ public class Mazesweeper {
 
         maze[player.oldLocation.x][player.oldLocation.y].hasPlayer = false;
         maze[player.currentLocation.x][player.currentLocation.y].hasPlayer = true;
+        maze[player.currentLocation.x][player.currentLocation.y].isCleared = true;
 
         maze[player.oldLocation.x][player.oldLocation.y].repaint();
         maze[player.currentLocation.x][player.currentLocation.y].repaint();
@@ -267,7 +270,6 @@ public class Mazesweeper {
                 selectedTile = new Point(player.currentLocation.x, player.currentLocation.y - 1);
             default -> { }
         }
-
         // De-select other tiles
         for (Tile[] row : maze) {
             for (Tile col : row) {
@@ -346,9 +348,7 @@ public class Mazesweeper {
     class LookUp extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (player.currentLocation.x > 0) {
-                look("UP");
-            }
+            look("UP");
         }
     }
 
@@ -358,9 +358,7 @@ public class Mazesweeper {
     class LookDown extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (player.currentLocation.x > 0) {
-                look("DOWN");
-            }
+            look("DOWN");
         }
     }
 
@@ -370,9 +368,7 @@ public class Mazesweeper {
     class LookLeft extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (player.currentLocation.x > 0) {
-                look("LEFT");
-            }
+            look("LEFT");
         }
     }
 
@@ -382,16 +378,13 @@ public class Mazesweeper {
     class LookRight extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (player.currentLocation.x > 0) {
-                look("RIGHT");
-            }
+            look("RIGHT");
         }
     }
 
     class MarkTile extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
-            // TODO Auto-generated method stub
             for (Tile[] row : maze) {
                 for (Tile col : row) {
                     if (col.selected) {
@@ -410,10 +403,10 @@ public class Mazesweeper {
             for (Tile[] row : maze) {
                 for (Tile col : row) {
                     if (player.hasDefuser && col.selected) {
-                        player.hasDefuser = false;
+                        //player.hasDefuser = false;
                         col.hasMine = false;
                         col.selected = false;
-                        col.cleared = true;
+                        col.isCleared = true;
                         col.repaint();
                     }
                 }
@@ -438,7 +431,7 @@ public class Mazesweeper {
 
         private boolean hasMine;
         private boolean hasPlayer = false;
-        private boolean cleared = false; // player has been on this tile before
+        private boolean isCleared = false; // player has been on this tile before
         private boolean selected = false;
         private boolean marked = false;
 
@@ -477,8 +470,10 @@ public class Mazesweeper {
                 this.setBackground(Color.CYAN);
             } else if (this.marked) {
                 this.setBackground(Color.RED);
-            } else if (this.cleared) {
-                this.setBackground(Color.YELLOW);
+            } else if (this.isCleared && mainColor == LIGHT_GREEN) {
+                this.setBackground(LIGHT_BEIGE);
+            } else if (this.isCleared && mainColor == DARK_GREEN) {
+                this.setBackground(DARK_BEIGE);
             } else {
                 this.setBackground(mainColor);
             }
