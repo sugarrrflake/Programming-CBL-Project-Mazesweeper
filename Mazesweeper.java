@@ -403,7 +403,7 @@ public class Mazesweeper {
             for (Tile[] row : maze) {
                 for (Tile col : row) {
                     if (player.hasDefuser && col.selected) {
-                        //player.hasDefuser = false;
+                        player.hasDefuser = false;
                         col.hasMine = false;
                         col.selected = false;
                         col.isCleared = true;
