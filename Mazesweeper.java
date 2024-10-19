@@ -39,6 +39,8 @@ public class Mazesweeper {
     private final LookRight lookRight;
     private final LookLeft lookLeft;
 
+    private final OpenActionMenu openActionMenu;
+
 
     public static final Dimension SCREEN_DIMENSION = Toolkit.getDefaultToolkit().getScreenSize();
 
@@ -65,6 +67,8 @@ public class Mazesweeper {
         this.lookDown = new LookDown();
         this.lookRight = new LookRight();
         this.lookLeft = new LookLeft();
+
+        this.openActionMenu = new OpenActionMenu();
         
         frame.setLayout(null);
         int frameWidth = (TILE_SIZE * 10) + 16;
@@ -119,6 +123,9 @@ public class Mazesweeper {
 
         mazePanel.getInputMap().put(KeyStroke.getKeyStroke("RIGHT"), "lookRIGHT");
         mazePanel.getActionMap().put("lookRIGHT", this.lookRight);
+
+        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "actionMenu");
+        mazePanel.getActionMap().put("actionMenu", this.openActionMenu);
 
         frame.add(mazePanel);
 
@@ -368,7 +375,21 @@ public class Mazesweeper {
         }
     }
 
-
+    class OpenActionMenu extends AbstractAction {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // TODO Auto-generated method stub
+            for (Tile[] row : maze) {
+                for (Tile col : row) {
+                    if (col.selected) {
+                        col.marked = !col.marked;
+                        col.selected = false;
+                        col.repaint();
+                    }
+                }
+            }
+        }
+    }
 
 
 
@@ -388,6 +409,7 @@ public class Mazesweeper {
         private boolean hasMine;
         private boolean hasPlayer = false;
         private boolean selected = false;
+        private boolean marked = false;
 
         private final Color mainColor;
 
@@ -422,7 +444,8 @@ public class Mazesweeper {
                 this.setBackground(Color.MAGENTA);
             } else if (this.selected) {
                 this.setBackground(Color.CYAN);
-                System.out.println();
+            } else if (this.marked) {
+                this.setBackground(Color.RED);
             } else {
                 this.setBackground(mainColor);
             }
