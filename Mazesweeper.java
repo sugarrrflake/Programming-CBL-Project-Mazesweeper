@@ -40,7 +40,9 @@ public class Mazesweeper {
     private final LookRight lookRight;
     private final LookLeft lookLeft;
 
-    private final OpenActionMenu openActionMenu;
+    private final MarkTile markTile;
+    private final UseDefuser useDefuser;
+
 
 
     public static final Dimension SCREEN_DIMENSION = Toolkit.getDefaultToolkit().getScreenSize();
@@ -69,7 +71,8 @@ public class Mazesweeper {
         this.lookRight = new LookRight();
         this.lookLeft = new LookLeft();
 
-        this.openActionMenu = new OpenActionMenu();
+        this.markTile = new MarkTile();
+        this.useDefuser = new UseDefuser();
         
         frame.setLayout(null);
         int frameWidth = (TILE_SIZE * 10) + 16;
@@ -125,8 +128,17 @@ public class Mazesweeper {
         mazePanel.getInputMap().put(KeyStroke.getKeyStroke("RIGHT"), "lookRIGHT");
         mazePanel.getActionMap().put("lookRIGHT", this.lookRight);
 
-        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "actionMenu");
-        mazePanel.getActionMap().put("actionMenu", this.openActionMenu);
+        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "markTile");
+        mazePanel.getActionMap().put("markTile", this.markTile);
+
+        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("1"), "defuser");
+        mazePanel.getActionMap().put("defuser", this.useDefuser);
+
+        /*mazePanel.getInputMap().put(KeyStroke.getKeyStroke("2"), "radar");
+        mazePanel.getActionMap().put("radar", this.useRadar);
+
+        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("3"), "swapper");
+        mazePanel.getActionMap().put("swapper", this.useSwapper);*/
 
         frame.add(mazePanel);
 
@@ -376,7 +388,7 @@ public class Mazesweeper {
         }
     }
 
-    class OpenActionMenu extends AbstractAction {
+    class MarkTile extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
             // TODO Auto-generated method stub
@@ -385,6 +397,23 @@ public class Mazesweeper {
                     if (col.selected) {
                         col.marked = !col.marked;
                         col.selected = false;
+                        col.repaint();
+                    }
+                }
+            }
+        }
+    }
+
+    class UseDefuser extends AbstractAction {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            for (Tile[] row : maze) {
+                for (Tile col : row) {
+                    if (player.hasDefuser && col.selected) {
+                        player.hasDefuser = false;
+                        col.hasMine = false;
+                        col.selected = false;
+                        col.cleared = true;
                         col.repaint();
                     }
                 }
@@ -409,6 +438,7 @@ public class Mazesweeper {
 
         private boolean hasMine;
         private boolean hasPlayer = false;
+        private boolean cleared = false; // player has been on this tile before
         private boolean selected = false;
         private boolean marked = false;
 
@@ -447,6 +477,8 @@ public class Mazesweeper {
                 this.setBackground(Color.CYAN);
             } else if (this.marked) {
                 this.setBackground(Color.RED);
+            } else if (this.cleared) {
+                this.setBackground(Color.YELLOW);
             } else {
                 this.setBackground(mainColor);
             }
@@ -502,18 +534,18 @@ public class Mazesweeper {
         private Point oldLocation;
         private Point currentLocation;
         
-        private boolean defuser;
-        private boolean radar;
-        private boolean swapper;
+        private boolean hasDefuser = true;
+        private boolean hasRadar = true;
+        private boolean hasSwapper = true;
         
         /**
          * Creates a new player at the specified location.
          */
         public Player(Point location) {
             this.currentLocation = location;
-            this.defuser = true;
-            this.radar = true;
-            this.swapper = true;
+            this.hasDefuser = true;
+            this.hasRadar = true;
+            this.hasSwapper = true;
         }
     
         public void useDefuser() {
@@ -525,7 +557,7 @@ public class Mazesweeper {
         }
     
         public void useSwapper() {
-            //TODO
+            //TODO not on tile ur standing on
         }
     }
 }
