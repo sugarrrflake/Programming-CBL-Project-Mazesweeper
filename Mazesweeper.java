@@ -496,6 +496,8 @@ public class Mazesweeper {
             if (SwingUtilities.isLeftMouseButton(e) && player == null) {
                 player = new Player(new Point(this.row, this.col));
                 this.hasPlayer = true;
+                this.hasMine = false;
+                this.isCleared = true;
             } else if (SwingUtilities.isRightMouseButton(e)) { //TODO right click spawns mine for debug
                 this.hasMine = true;
             } else {
