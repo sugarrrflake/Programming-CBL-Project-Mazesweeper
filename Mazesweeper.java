@@ -42,6 +42,7 @@ public class Mazesweeper {
 
     private final MarkTile markTile;
     private final UseDefuser useDefuser;
+    private final UseRadar useRadar;
 
 
 
@@ -75,6 +76,7 @@ public class Mazesweeper {
 
         this.markTile = new MarkTile();
         this.useDefuser = new UseDefuser();
+        this.useRadar = new UseRadar();
         
         frame.setLayout(null);
         int frameWidth = (TILE_SIZE * 10) + 16;
@@ -136,10 +138,10 @@ public class Mazesweeper {
         mazePanel.getInputMap().put(KeyStroke.getKeyStroke("1"), "defuser");
         mazePanel.getActionMap().put("defuser", this.useDefuser);
 
-        /*mazePanel.getInputMap().put(KeyStroke.getKeyStroke("2"), "radar");
+        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("2"), "radar");
         mazePanel.getActionMap().put("radar", this.useRadar);
 
-        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("3"), "swapper");
+        /*mazePanel.getInputMap().put(KeyStroke.getKeyStroke("3"), "swapper");
         mazePanel.getActionMap().put("swapper", this.useSwapper);*/
 
         frame.add(mazePanel);
@@ -270,20 +272,22 @@ public class Mazesweeper {
                 selectedTile = new Point(player.currentLocation.x, player.currentLocation.y - 1);
             default -> { }
         }
-        // De-select other tiles
+
+        // Go through all tiles
         for (Tile[] row : maze) {
             for (Tile col : row) {
-                col.selected = false;
+                /* If tile is the selected tile, set selected to true 
+                (or deselect if it was already selected)*/
+                if (col == maze[selectedTile.x][selectedTile.y]) {
+                    col.selected = !col.selected;
+
+                //De-select other tiles
+                } else {   
+                    col.selected = false;
+                }
                 col.repaint();
             }
         }
-
-        // set the selected tile and paint it a different colour
-        if (selectedTile != null) {
-            maze[selectedTile.x][selectedTile.y].selected = true;
-            maze[selectedTile.x][selectedTile.y].repaint();
-        }
-            
     }
 
     class ReturnToMenu implements ActionListener {
@@ -388,7 +392,7 @@ public class Mazesweeper {
             for (Tile[] row : maze) {
                 for (Tile col : row) {
                     if (col.selected) {
-                        col.marked = !col.marked;
+                        col.isMarked = !col.isMarked;
                         col.selected = false;
                         col.repaint();
                     }
@@ -400,10 +404,11 @@ public class Mazesweeper {
     class UseDefuser extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
+            // loops to find selected tile
             for (Tile[] row : maze) {
                 for (Tile col : row) {
                     if (player.hasDefuser && col.selected) {
-                        player.hasDefuser = false;
+                        player.hasDefuser = false; // use up defuser
                         col.hasMine = false;
                         col.selected = false;
                         col.isCleared = true;
@@ -414,7 +419,36 @@ public class Mazesweeper {
         }
     }
 
+    class UseRadar extends AbstractAction {
+        @Override
+        public void actionPerformed(ActionEvent e) {
 
+            Tile tile; //the tile being checked by the radar
+            if (player.hasRadar) {
+                // loop through tiles in a 5x5 radius around player.
+                for (int i = -2; i <= 2; i++) {
+                    for (int j = -2; j <= 2; j++) {
+                        /* if player is too close to edge, tile doesn't exist. 
+                        code no like that. need try catch */
+                        try {
+                            tile = maze[player.currentLocation.x + i][player.currentLocation.y + j];
+                            if (tile.hasMine) {
+                                tile.isMarked = true;
+                                tile.isCleared = false;
+                            } else {
+                                tile.isMarked = false;
+                                tile.isCleared = true;
+                            }
+                            tile.repaint();
+                        } catch (java.lang.ArrayIndexOutOfBoundsException exception) { 
+                            System.out.println("Array out of bounds exception when using radar.");
+                        }
+                    }
+                }
+                player.hasRadar = false; // only have one radar which gets used up
+            }
+        }
+    }
 
 
 
@@ -433,7 +467,7 @@ public class Mazesweeper {
         private boolean hasPlayer = false;
         private boolean isCleared = false; // player has been on this tile before
         private boolean selected = false;
-        private boolean marked = false;
+        private boolean isMarked = false;
 
         private final Color mainColor;
 
@@ -468,7 +502,7 @@ public class Mazesweeper {
                 this.setBackground(Color.MAGENTA);
             } else if (this.selected) {
                 this.setBackground(Color.CYAN);
-            } else if (this.marked) {
+            } else if (this.isMarked) {
                 this.setBackground(Color.RED);
             } else if (this.isCleared && mainColor == LIGHT_GREEN) {
                 this.setBackground(LIGHT_BEIGE);
