@@ -8,6 +8,8 @@ import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Random;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -43,6 +45,7 @@ public class Mazesweeper {
     private final MarkTile markTile;
     private final UseDefuser useDefuser;
     private final UseRadar useRadar;
+    private final UseSwapper useSwapper;
 
 
 
@@ -55,11 +58,17 @@ public class Mazesweeper {
     public static final Color LIGHT_BEIGE = new Color(231, 229, 131);
     public static final Color DARK_BEIGE = new Color(216, 214, 119);
 
+    public Random randomGenerator = new Random();
+    public long seed = randomGenerator.nextLong();
+
     /**
      * Constructor for the main Mazesweeper game.
      * Initializing the game with an empty "maze".
      */
     public Mazesweeper() {
+
+        // TODO SET RANDOM SEED IN DEBUG MENU
+        randomGenerator = new Random(seed);
 
         this.maze = new Tile[10][10];
         this.frame = new JFrame("Mazesweeper");
@@ -77,6 +86,7 @@ public class Mazesweeper {
         this.markTile = new MarkTile();
         this.useDefuser = new UseDefuser();
         this.useRadar = new UseRadar();
+        this.useSwapper = new UseSwapper();
         
         frame.setLayout(null);
         int frameWidth = (TILE_SIZE * 10) + 16;
@@ -141,8 +151,8 @@ public class Mazesweeper {
         mazePanel.getInputMap().put(KeyStroke.getKeyStroke("2"), "radar");
         mazePanel.getActionMap().put("radar", this.useRadar);
 
-        /*mazePanel.getInputMap().put(KeyStroke.getKeyStroke("3"), "swapper");
-        mazePanel.getActionMap().put("swapper", this.useSwapper);*/
+        mazePanel.getInputMap().put(KeyStroke.getKeyStroke("3"), "swapper");
+        mazePanel.getActionMap().put("swapper", this.useSwapper);
 
         frame.add(mazePanel);
 
@@ -252,7 +262,7 @@ public class Mazesweeper {
         // De-select tile if one was selected
         for (Tile[] row : maze) {
             for (Tile col : row) {
-                col.selected = false;
+                col.isSelected = false;
                 col.repaint();
             }
         }
@@ -279,11 +289,11 @@ public class Mazesweeper {
                 /* If tile is the selected tile, set selected to true 
                 (or deselect if it was already selected)*/
                 if (col == maze[selectedTile.x][selectedTile.y]) {
-                    col.selected = !col.selected;
+                    col.isSelected = !col.isSelected;
 
                 //De-select other tiles
                 } else {   
-                    col.selected = false;
+                    col.isSelected = false;
                 }
                 col.repaint();
             }
@@ -391,9 +401,9 @@ public class Mazesweeper {
         public void actionPerformed(ActionEvent e) {
             for (Tile[] row : maze) {
                 for (Tile col : row) {
-                    if (col.selected) {
+                    if (col.isSelected) {
                         col.isMarked = !col.isMarked;
-                        col.selected = false;
+                        col.isSelected = false;
                         col.repaint();
                     }
                 }
@@ -407,10 +417,11 @@ public class Mazesweeper {
             // loops to find selected tile
             for (Tile[] row : maze) {
                 for (Tile col : row) {
-                    if (player.hasDefuser && col.selected) {
+                    if (player.hasDefuser && col.isSelected) {
                         player.hasDefuser = false; // use up defuser
                         col.hasMine = false;
-                        col.selected = false;
+                        col.isSelected = false;
+                        col.isMarked = false;
                         col.isCleared = true;
                         col.repaint();
                     }
@@ -426,7 +437,7 @@ public class Mazesweeper {
             Tile tile; //the tile being checked by the radar
             if (player.hasRadar) {
                 // loop through tiles in a 5x5 radius around player.
-                for (int i = -2; i <= 2; i++) {
+                for (int i = -2; i <= 2; i++) { 
                     for (int j = -2; j <= 2; j++) {
                         /* if player is too close to edge, tile doesn't exist. 
                         code no like that. need try catch */
@@ -450,7 +461,58 @@ public class Mazesweeper {
         }
     }
 
+    class UseSwapper extends AbstractAction {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // TODO Auto-generated method stub
+            for (Tile[] row : maze) {
+                for (Tile col : row) {
+                    if (player.hasSwapper && col.isSelected) {
+                        /* NOTE: breaks if there's only 1 mine/free tile, because it can't find one
+                        This should never happen in a game anyway, but watch it while debugging */
 
+                        // select another tile with a mine if tile does not have mine and vice versa
+                        ArrayList<Tile> clearTiles = Tile.getClearedTiles(maze);
+                        int row2;
+                        int col2;
+                        Tile tile2;
+                        do {
+                            // If possible, we want to swap the mine tile with a cleared tile
+                            if (col.hasMine && clearTiles.size() > 0) {
+                                // Picks a random tile from the ArrayList of cleared tiles
+                                tile2 = clearTiles.get(randomGenerator.nextInt(clearTiles.size()));
+
+                                /* in case something goes wrong and this is called again, 
+                                ensures that it can't pick the same tile */
+                                clearTiles.remove(tile2); 
+
+                            // If not enough cleared tiles, or the selected tile isn't a mine
+                            } else {
+                                // Pick any tile
+                                row2 = randomGenerator.nextInt(10);
+                                col2 = randomGenerator.nextInt(10);
+                                tile2 = maze[row2][col2];
+                            }
+                        } while (tile2.hasMine == col.hasMine || tile2.hasPlayer); 
+
+                        player.hasSwapper = false; // use up swapper
+                        col.isSelected = false;
+                        col.hasMine = !col.hasMine;
+                        tile2.hasMine = !tile2.hasMine;
+
+                        if (col.isMarked ^ col.isCleared) {
+                            col.isCleared = !col.isCleared;
+                            col.isMarked = !col.isMarked;
+                        }
+
+                        col.repaint();
+                        tile2.repaint();
+                        //TODO pick random clear tile, otherwise pick random !hasMine tile
+                    }
+                }
+            }
+        }
+    }
 
 
 
@@ -466,7 +528,7 @@ public class Mazesweeper {
         private boolean hasMine;
         private boolean hasPlayer = false;
         private boolean isCleared = false; // player has been on this tile before
-        private boolean selected = false;
+        private boolean isSelected = false;
         private boolean isMarked = false;
 
         private final Color mainColor;
@@ -500,7 +562,7 @@ public class Mazesweeper {
             super.paintComponent(g);
             if (this.hasPlayer) {
                 this.setBackground(Color.MAGENTA);
-            } else if (this.selected) {
+            } else if (this.isSelected) {
                 this.setBackground(Color.CYAN);
             } else if (this.isMarked) {
                 this.setBackground(Color.RED);
@@ -511,6 +573,23 @@ public class Mazesweeper {
             } else {
                 this.setBackground(mainColor);
             }
+        }
+
+        /**
+         * Gets all the cleared tiles in the maze.
+         * @param maze the maze in which to look for cleared tiles (just the normal game maze)
+         * @return returns arraylist with all the cleared tiles.
+         */
+        static ArrayList<Tile> getClearedTiles(Tile[][] maze) {
+            ArrayList<Tile> clearedTiles = new ArrayList<Tile>();
+            for (Tile [] row : maze) {
+                for (Tile col : row) {
+                    if (col.isCleared) {
+                        clearedTiles.add(col);
+                    }
+                }
+            }
+            return clearedTiles;
         }
         
         @Override
