@@ -163,7 +163,6 @@ public class Mazesweeper {
      * Initialize the maze of the game.
      */
     public final void mazeInit() {
-
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
                 // Set the color each tile depending on its position:
@@ -221,7 +220,9 @@ public class Mazesweeper {
 
         maze[player.oldLocation.x][player.oldLocation.y].hasPlayer = false;
         maze[player.currentLocation.x][player.currentLocation.y].hasPlayer = true;
-        maze[player.currentLocation.x][player.currentLocation.y].isCleared = true;
+        if (!maze[player.currentLocation.x][player.currentLocation.y].isCleared) {
+            maze[player.currentLocation.x][player.currentLocation.y].clearTile();
+        }
 
         maze[player.oldLocation.x][player.oldLocation.y].repaint();
         maze[player.currentLocation.x][player.currentLocation.y].repaint();
@@ -422,7 +423,10 @@ public class Mazesweeper {
                         col.hasMine = false;
                         col.isSelected = false;
                         col.isMarked = false;
-                        col.isCleared = true;
+                        if (!col.isCleared) {
+                            col.clearTile();
+                        }
+
                         col.repaint();
                     }
                 }
@@ -448,11 +452,13 @@ public class Mazesweeper {
                                 tile.isCleared = false;
                             } else {
                                 tile.isMarked = false;
-                                tile.isCleared = true;
+                                if (!tile.isCleared) {
+                                    tile.clearTile();
+                                }
                             }
                             tile.repaint();
                         } catch (java.lang.ArrayIndexOutOfBoundsException exception) { 
-                            System.out.println("Array out of bounds exception when using radar.");
+                            System.err.println("Array out of bounds exception when using radar.");
                         }
                     }
                 }
@@ -464,7 +470,6 @@ public class Mazesweeper {
     class UseSwapper extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
-            // TODO Auto-generated method stub
             for (Tile[] row : maze) {
                 for (Tile col : row) {
                     if (player.hasSwapper && col.isSelected) {
@@ -562,21 +567,45 @@ public class Mazesweeper {
             super.paintComponent(g);
             if (this.hasPlayer) {
                 this.setBackground(Color.MAGENTA);
+                this.setBorder(BorderFactory.createLineBorder(Color.BLACK));
             } else if (this.isSelected) {
                 this.setBackground(Color.CYAN);
             } else if (this.isMarked) {
                 this.setBackground(Color.RED);
             } else if (this.isCleared && mainColor == LIGHT_GREEN) {
                 this.setBackground(LIGHT_BEIGE);
+                this.setBorder(BorderFactory.createEmptyBorder());
             } else if (this.isCleared && mainColor == DARK_GREEN) {
                 this.setBackground(DARK_BEIGE);
+                this.setBorder(BorderFactory.createEmptyBorder());
             } else {
                 this.setBackground(mainColor);
             }
         }
 
         /**
+         * Clears a tile and gives its mine hint.
+         */
+        public void clearTile() {
+            this.isCleared = true;
+            int mineNumber = 0;
+            for (int i = row - 1; i <= row + 1; i++) {
+                for (int j = col - 1; j <= col + 1; j++) {
+                    if ((i >= 0 && i < 10) && (j >= 0 && j < 10)) {
+                        if (maze[i][j].hasMine) {
+                            mineNumber++;
+                        }
+                    }
+                }
+            }
+            JLabel mineHint = new JLabel("" + mineNumber);
+            mineHint.setVisible(true);
+            this.add(mineHint);
+        }
+
+        /**
          * Gets all the cleared tiles in the maze.
+         * 
          * @param maze the maze in which to look for cleared tiles (just the normal game maze)
          * @return returns arraylist with all the cleared tiles.
          */
@@ -594,9 +623,7 @@ public class Mazesweeper {
         
         @Override
         public void mouseEntered(MouseEvent e) {
-            if (!this.hasPlayer) {
-                this.setBorder(BorderFactory.createLoweredBevelBorder());
-            }
+            this.setBorder(BorderFactory.createLoweredBevelBorder());
         }
     
         @Override
@@ -610,11 +637,39 @@ public class Mazesweeper {
                 player = new Player(new Point(this.row, this.col));
                 this.hasPlayer = true;
                 this.hasMine = false;
-                this.isCleared = true;
-            } else if (SwingUtilities.isRightMouseButton(e)) { //TODO right click spawns mine for debug
+                this.clearTile();
+
+                Random rndMine = new Random(seed);
+
+                for (int i = 0; i < 10; i++) {
+                    for (int j = 0; j < 10; j++) {
+
+                        boolean isMine = rndMine.nextInt(2) == 0;
+
+                        if (i < player.currentLocation.x - 1 || i > player.currentLocation.x + 1) {
+                            if (j < player.currentLocation.y - 1 || j > player.currentLocation.y + 1) {
+                                if ((i >= 0 && i < 10) && (j >= 0 && j < 10)) {
+                                    maze[i][j].hasMine = isMine;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for (int i = player.currentLocation.x - 1; i <= player.currentLocation.x + 1; i++) {
+                    for (int j = player.currentLocation.y - 1; j <= player.currentLocation.y + 1; j++) {
+                        if ((i >= 0 && i < 10) && (j >= 0 && j < 10)) {
+                            if (i != player.currentLocation.x || j != player.currentLocation.y) {
+                                maze[i][j].clearTile();
+                            }
+                        }
+                    }
+                }
+
+            } else if (SwingUtilities.isRightMouseButton(e)) { //right click spawns mine for debug
                 this.hasMine = true;
             } else {
-                System.out.println("player already spawned");
+                System.err.println("player already spawned");
             }
         }
         
