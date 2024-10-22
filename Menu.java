@@ -3,11 +3,23 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
+import java.awt.Graphics;
+import java.io.File;
+import java.awt.BorderLayout;
+import java.io.*;
+
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
 
@@ -16,7 +28,7 @@ import javax.swing.SwingUtilities;
  */
 public class Menu {
 
-    private static JFrame frame = new JFrame("Mazesweeper Startup");
+    private static JFrame frame = new JFrame("Mazesweeper Startup"); 
 
     // button ActionListeners
     StartButtonEventHandler startListener = new StartButtonEventHandler();
@@ -47,13 +59,26 @@ public class Menu {
      * Sets up the start menu screen.
      */
     public Menu() {
+
+        // Setup of background image
+        try {
+            final Image MazesweeperBackground = javax.imageio.ImageIO.read(new File("Mazesweeper.png"));
+            BackgroundPanel backgroundPanel = new BackgroundPanel(MazesweeperBackground, frame);
+            frame.setContentPane(backgroundPanel);
+        // The line where it reads the file really wants IOException to be handled
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         // frame init
         frame.setLayout(new GridBagLayout());
         //sets window size relative to user's screen size
         frame.setSize(frameWidth, frameHeight);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
-        frame.getContentPane().setBackground(Mazesweeper.DARK_GREEN);
+        //label.setSize(frame.getSize());
+        //frame.setContentPane(label);
+        //frame.getContentPane().setBackground(Mazesweeper.DARK_GREEN);
 
         // GridBagConstraint config.
         constraints.insets = new Insets(topInset, leftInset, bottomInset, rightInset);
@@ -61,30 +86,37 @@ public class Menu {
 
         // start button init
         JButton startButton = new JButton("START");
-        startButton.setBackground(Mazesweeper.LIGHT_GREEN);
+        startButton.setBackground(Mazesweeper.LIGHT_BEIGE);
         startButton.addActionListener(startListener);
         startButton.setPreferredSize(buttonDimension);
         startButton.setFont(new Font("Dialog", Font.BOLD, buttonFontSize));
+        // mouselistener for changing colour when hovering over it
+        startButton.addMouseListener(new ButtonMouseListener(startButton));
         frame.add(startButton, constraints);
 
         // rules button init
         JButton rulesButton = new JButton("HOW TO PLAY");
-        rulesButton.setBackground(Mazesweeper.LIGHT_GREEN);
+        rulesButton.setBackground(Mazesweeper.LIGHT_BEIGE);
         rulesButton.addActionListener(rulesListener);
         rulesButton.setPreferredSize(buttonDimension);
         rulesButton.setFont(new Font("Dialog", Font.BOLD, buttonFontSize));
         constraints.insets.top = bottomInset; // sets top inset to be same as other insets
         constraints.gridy = 1; // gridy of start button is 0, rules button is 1 lower
+        // mouselistener for changing colour when hovering over it
+        rulesButton.addMouseListener(new ButtonMouseListener(rulesButton));
         frame.add(rulesButton, constraints);
 
         // quit button init
         JButton quitButton = new JButton("QUIT");
-        quitButton.setBackground(Mazesweeper.LIGHT_GREEN);
+        quitButton.setBackground(Mazesweeper.LIGHT_BEIGE);
         quitButton.addActionListener(quitListener);
         quitButton.setPreferredSize(buttonDimension);
         quitButton.setFont(new Font("Dialog", Font.BOLD, buttonFontSize));
         constraints.gridy = 2; // gridy of rules button is 1, quit button is 1 lower
+        // mouselistener for changing colour when hovering over it
+        quitButton.addMouseListener(new ButtonMouseListener(quitButton));
         frame.add(quitButton, constraints);
+
         frame.setVisible(true);
     }
 
@@ -103,6 +135,27 @@ public class Menu {
             Menu startMenu = new Menu();
 
         });
+    }
+}
+
+class BackgroundPanel extends JPanel {
+
+    private Image backgroundImage;
+    private JFrame frame;
+
+    /**
+     * Constructor, to access host frame properties and the image being used.
+     * @param backgroundImage The image to draw
+     * @param frame The frame this will be the background for, used to set dimensions
+     */
+    BackgroundPanel(Image backgroundImage, JFrame frame) {
+        this.backgroundImage = backgroundImage;
+        this.frame = frame;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        g.drawImage(backgroundImage, 0, 0, frame.getWidth(), frame.getHeight(), null);
     }
 }
 
@@ -137,5 +190,42 @@ class QuitButtonEventHandler implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         System.exit(0);
+    }
+}
+
+class ButtonMouseListener implements MouseListener {
+    
+    private JButton button;
+
+    ButtonMouseListener(JButton button) {
+        this.button = button;
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        button.setBackground(Mazesweeper.DARK_BEIGE);
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        button.setBackground(Mazesweeper.LIGHT_BEIGE);
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
     }
 }
