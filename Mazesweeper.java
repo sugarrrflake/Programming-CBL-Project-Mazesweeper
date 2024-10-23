@@ -8,6 +8,9 @@ import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.*;
+import java.lang.reflect.Array;
+import java.net.http.HttpResponse;
+import java.nio.channels.NonWritableChannelException;
 import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.AbstractAction;
@@ -31,6 +34,7 @@ public class Mazesweeper {
     private JPanel inventoryPanel;
     private Tile[][] maze;
     private Player player = null;
+    private Point goalLoaction = null;
 
     private final MoveUp moveUp;
     private final MoveDown moveDown;
@@ -170,21 +174,21 @@ public class Mazesweeper {
                 // Dark  - Light - Dark ...
                 if (i % 2 == 0) {
                     if (j % 2 == 0) {
-                        maze[i][j] = new Tile(false, i, j, LIGHT_GREEN);
+                        maze[i][j] = new Tile(i, j, LIGHT_GREEN);
                         maze[i][j].setSize(TILE_SIZE, TILE_SIZE);
                         maze[i][j].setBackground(LIGHT_GREEN);
                     } else {
-                        maze[i][j] = new Tile(false, i, j, DARK_GREEN);
+                        maze[i][j] = new Tile(i, j, DARK_GREEN);
                         maze[i][j].setSize(TILE_SIZE, TILE_SIZE);
                         maze[i][j].setBackground(DARK_GREEN);
                     }
                 } else {
                     if (j % 2 == 0) {
-                        maze[i][j] = new Tile(false, i, j, DARK_GREEN);
+                        maze[i][j] = new Tile(i, j, DARK_GREEN);
                         maze[i][j].setSize(TILE_SIZE, TILE_SIZE);
                         maze[i][j].setBackground(DARK_GREEN);
                     } else {
-                        maze[i][j] = new Tile(false, i, j, LIGHT_GREEN);
+                        maze[i][j] = new Tile(i, j, LIGHT_GREEN);
                         maze[i][j].setSize(TILE_SIZE, TILE_SIZE);
                         maze[i][j].setBackground(LIGHT_GREEN);
                     }
@@ -522,6 +526,33 @@ public class Mazesweeper {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * Class describing the tiles that make up the maze.
      */
@@ -530,7 +561,8 @@ public class Mazesweeper {
         private final int row;
         private final int col;
 
-        private boolean hasMine;
+        private boolean hasMine = false;
+        private boolean isGoal = false;
         private boolean hasPlayer = false;
         private boolean isCleared = false; // player has been on this tile before
         private boolean isSelected = false;
@@ -546,8 +578,7 @@ public class Mazesweeper {
          * @param row the row coordinate of the tile
          * @param col the column coordinate of the tile
          */
-        public Tile(boolean hasMine, int row, int col, Color mainColor) {
-            this.hasMine = hasMine;
+        public Tile(int row, int col, Color mainColor) {
             this.row = row;
             this.col = col;
             this.mainColor = mainColor;
@@ -567,6 +598,9 @@ public class Mazesweeper {
             super.paintComponent(g);
             if (this.hasPlayer) {
                 this.setBackground(Color.MAGENTA);
+                this.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+            } else if (this.isGoal) {
+                this.setBackground(Color.YELLOW);
                 this.setBorder(BorderFactory.createLineBorder(Color.BLACK));
             } else if (this.isSelected) {
                 this.setBackground(Color.CYAN);
@@ -638,16 +672,56 @@ public class Mazesweeper {
                 this.hasPlayer = true;
                 this.hasMine = false;
                 this.clearTile();
+                this.repaint();
 
+                // Spawning the goal in relation to the player
+                Point goal = new Point(player.currentLocation.x, player.currentLocation.y);
+                Point oldGoal = new Point(goal);
+                ArrayList<Point> visitedTiles = new ArrayList<Point>();
+
+                Random randomGoal = new Random(seed);
+                for (int i = 0; i < 30; i++) {
+
+                    Point newGoal = new Point(goal);
+                    // if the current tile has already 
+                    // been visited, backtrack
+                    if (visitedTiles.contains(newGoal)) {
+                        goal.x = oldGoal.x;
+                        goal.y = oldGoal.y;
+                    // otherwise add it to the visited pile
+                    } else {
+                        visitedTiles.add(newGoal);
+                        oldGoal.x = goal.x;
+                        oldGoal.y = goal.y;
+                    }
+
+                    // pick a random direction, starting at the player spawn
+                    int direction = randomGoal.nextInt(3);
+
+                    // if the tile in that direction is
+                    // not out of bounds, move there
+                    switch (direction) {
+                        case 0 -> goal.x = goal.x - 1 >= 0 ? goal.x - 1 : goal.x;
+                        case 1 -> goal.y = goal.y + 1 <= 9 ? goal.y + 1 : goal.y;
+                        case 2 -> goal.x = goal.x + 1 <= 9 ? goal.x + 1 : goal.x;
+                        case 3 -> goal.y = goal.y - 1 >= 0 ? goal.y - 1 : goal.y;
+                        default -> { }
+                    }
+
+                }
+
+                maze[goal.x][goal.y].isGoal = true;
+                maze[goal.x][goal.y].repaint();
+                goalLoaction = new Point(goal.x, goal.y);
+
+                // Random generation of mines while leaving 
+                // out the 3x3 area at the player spawn
                 Random rndMine = new Random(seed);
-
                 for (int i = 0; i < 10; i++) {
                     for (int j = 0; j < 10; j++) {
-
-                        boolean isMine = rndMine.nextInt(2) == 0;
-
-                        if (i < player.currentLocation.x - 1 || i > player.currentLocation.x + 1) {
-                            if (j < player.currentLocation.y - 1 || j > player.currentLocation.y + 1) {
+                        boolean isMine = rndMine.nextInt(3) == 0;
+                        if (i < player.currentLocation.x - 1 || i > player.currentLocation.x + 1 || j < player.currentLocation.y - 1 || j > player.currentLocation.y + 1) {
+                            if (i != goalLoaction.x && j != goalLoaction.y) {
                                 if ((i >= 0 && i < 10) && (j >= 0 && j < 10)) {
                                     maze[i][j].hasMine = isMine;
                                 }
@@ -656,11 +730,16 @@ public class Mazesweeper {
                     }
                 }
 
+                // Clearing a 3x3 safe area around the player
+                // if we are in that area
                 for (int i = player.currentLocation.x - 1; i <= player.currentLocation.x + 1; i++) {
                     for (int j = player.currentLocation.y - 1; j <= player.currentLocation.y + 1; j++) {
+                        // and not out of bounds
                         if ((i >= 0 && i < 10) && (j >= 0 && j < 10)) {
+                            // and not on the player tile
                             if (i != player.currentLocation.x || j != player.currentLocation.y) {
                                 maze[i][j].clearTile();
+                                maze[i][j].repaint();
                             }
                         }
                     }
@@ -679,6 +758,26 @@ public class Mazesweeper {
         @Override
         public void mouseClicked(MouseEvent e) {}
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -711,18 +810,6 @@ public class Mazesweeper {
             this.hasDefuser = true;
             this.hasRadar = true;
             this.hasSwapper = true;
-        }
-    
-        public void useDefuser() {
-            //TODO
-        }
-    
-        public void useRadar() {
-            //TODO
-        }
-    
-        public void useSwapper() {
-            //TODO not on tile ur standing on
         }
     }
 }
