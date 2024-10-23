@@ -679,7 +679,6 @@ public class Mazesweeper {
                 Point oldGoal = new Point(goal);
                 ArrayList<Point> visitedTiles = new ArrayList<Point>();
 
-                Random randomGoal = new Random(seed);
                 for (int i = 0; i < 30; i++) {
 
                     Point newGoal = new Point(goal);
@@ -696,7 +695,7 @@ public class Mazesweeper {
                     }
 
                     // pick a random direction, starting at the player spawn
-                    int direction = randomGoal.nextInt(3);
+                    int direction = randomGenerator.nextInt(3);
 
                     // if the tile in that direction is
                     // not out of bounds, move there
@@ -716,10 +715,9 @@ public class Mazesweeper {
 
                 // Random generation of mines while leaving 
                 // out the 3x3 area at the player spawn
-                Random rndMine = new Random(seed);
                 for (int i = 0; i < 10; i++) {
                     for (int j = 0; j < 10; j++) {
-                        boolean isMine = rndMine.nextInt(3) == 0;
+                        boolean isMine = randomGenerator.nextInt(3) == 0;
                         if (i < player.currentLocation.x - 1 || i > player.currentLocation.x + 1 || j < player.currentLocation.y - 1 || j > player.currentLocation.y + 1) {
                             if (i != goalLoaction.x && j != goalLoaction.y) {
                                 if ((i >= 0 && i < 10) && (j >= 0 && j < 10)) {
