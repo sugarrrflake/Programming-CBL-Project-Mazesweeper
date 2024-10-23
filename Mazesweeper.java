@@ -8,9 +8,6 @@ import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.*;
-import java.lang.reflect.Array;
-import java.net.http.HttpResponse;
-import java.nio.channels.NonWritableChannelException;
 import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.AbstractAction;
@@ -30,9 +27,8 @@ import javax.swing.WindowConstants;
  */
 public class Mazesweeper {
  
-    private JFrame frame;
-    private JPanel inventoryPanel;
-    private Tile[][] maze;
+    private final JFrame frame;
+    private final Tile[][] maze;
     private Player player = null;
     private Point goalLoaction = null;
 
@@ -48,13 +44,13 @@ public class Mazesweeper {
 
     private final MarkTile markTile;
     private final UseDefuser useDefuser;
+    private JLabel defuserUI;
     private final UseRadar useRadar;
+    private JLabel radarUI;
     private final UseSwapper useSwapper;
-
-
+    private JLabel swapperUI;
 
     public static final Dimension SCREEN_DIMENSION = Toolkit.getDefaultToolkit().getScreenSize();
-
     public static final int TILE_SIZE = SCREEN_DIMENSION.height / 15;
 
     public static final Color LIGHT_GREEN = new Color(50, 215, 30);
@@ -62,8 +58,8 @@ public class Mazesweeper {
     public static final Color LIGHT_BEIGE = new Color(231, 229, 131);
     public static final Color DARK_BEIGE = new Color(216, 214, 119);
 
-    public Random randomGenerator = new Random();
-    public long seed = randomGenerator.nextLong();
+    private Random randomGenerator = new Random();
+    private final long seed = randomGenerator.nextLong();
 
     /**
      * Constructor for the main Mazesweeper game.
@@ -102,11 +98,30 @@ public class Mazesweeper {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
 
-        this.inventoryPanel = new JPanel();
+        JPanel inventoryPanel = new JPanel();
         inventoryPanel.setSize(TILE_SIZE * 10, 100);
         inventoryPanel.setBackground(Color.GRAY);
         inventoryPanel.setLocation(0, 0);
         inventoryPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+        inventoryPanel.setLayout(new GridLayout(1, 3));
+
+        this.defuserUI = new JLabel("Press [1] to use Defuser");
+        defuserUI.setFont(new Font("Sans_Serif", Font.BOLD, TILE_SIZE / 4));
+        defuserUI.setForeground(Color.WHITE);
+
+        this.radarUI = new JLabel("Press [2] to use Radar");
+        radarUI.setFont(new Font("Sans_Serif", Font.BOLD, TILE_SIZE / 4));
+        radarUI.setForeground(Color.WHITE);
+
+        this.swapperUI = new JLabel("Press [3] to use Swapper");
+        swapperUI.setFont(new Font("Sans_Serif", Font.BOLD, TILE_SIZE / 4));
+        swapperUI.setForeground(Color.WHITE);
+
+        inventoryPanel.add(defuserUI);
+        inventoryPanel.add(radarUI);
+        inventoryPanel.add(swapperUI);
+
         frame.add(inventoryPanel);
 
         JPanel mazePanel = new JPanel();
@@ -230,7 +245,8 @@ public class Mazesweeper {
 
         maze[player.oldLocation.x][player.oldLocation.y].repaint();
         maze[player.currentLocation.x][player.currentLocation.y].repaint();
-            
+        
+        // if the player stepped on a mine, display the game over screen
         if (maze[player.currentLocation.x][player.currentLocation.y].hasMine) {
             JDialog gameOver = new JDialog(frame, "Game Over!", Dialog.ModalityType.DOCUMENT_MODAL);
 
@@ -262,6 +278,39 @@ public class Mazesweeper {
 
             gameOver.setVisible(true);
 
+        }
+
+        //if the player reached the goal, display the victory screen
+        if (maze[player.currentLocation.x][player.currentLocation.y].isGoal) {
+            JDialog victory = new JDialog(frame, "Victory!", Dialog.ModalityType.DOCUMENT_MODAL);
+
+            int overWidth = SCREEN_DIMENSION.width / 5;
+            int overHeight = SCREEN_DIMENSION.height / 5;
+            int overX = (SCREEN_DIMENSION.width - overWidth) / 2;
+            int overY = (SCREEN_DIMENSION.height - overHeight) / 2;
+
+            victory.setLocation(overX, overY);
+            victory.setSize(overWidth, overHeight);
+            victory.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+            victory.setLayout(new FlowLayout());
+
+            JLabel victoryText = new JLabel("You won!");
+            victoryText.setFont(new Font("Sans_Serif", Font.BOLD, overHeight / 4));
+            victory.add(victoryText);
+
+            JLabel goalText = new JLabel("You reached the goal");
+            goalText.setFont(new Font("Sans_Serif", Font.ITALIC, overHeight / 8));
+            victory.add(goalText);
+
+            victory.add(Box.createHorizontalStrut(overWidth));
+
+            JButton menuReturn = new JButton("Return to main menu");
+            menuReturn.setFont(new Font("Sans_Serif", Font.PLAIN, overHeight / 10));
+            ReturnToMenu returnToMenu = new ReturnToMenu();
+            menuReturn.addActionListener(returnToMenu);
+            victory.add(menuReturn);
+
+            victory.setVisible(true);
         }
 
         // De-select tile if one was selected
@@ -435,6 +484,8 @@ public class Mazesweeper {
                     }
                 }
             }
+            defuserUI.setText("Defuser has been used up!");
+            defuserUI.setForeground(Color.RED);
         }
     }
 
@@ -468,6 +519,8 @@ public class Mazesweeper {
                 }
                 player.hasRadar = false; // only have one radar which gets used up
             }
+            radarUI.setText("Radar has been used up!");
+            radarUI.setForeground(Color.RED);
         }
     }
 
@@ -520,6 +573,8 @@ public class Mazesweeper {
                     }
                 }
             }
+            swapperUI.setText("Swapper has been used up!");
+            swapperUI.setForeground(Color.RED);
         }
     }
 
@@ -633,6 +688,7 @@ public class Mazesweeper {
                 }
             }
             JLabel mineHint = new JLabel("" + mineNumber);
+            mineHint.setFont(new Font("Sans_Serif", Font.BOLD, TILE_SIZE / 2));
             mineHint.setVisible(true);
             this.add(mineHint);
         }
@@ -745,6 +801,7 @@ public class Mazesweeper {
 
             } else if (SwingUtilities.isRightMouseButton(e)) { //right click spawns mine for debug
                 this.hasMine = true;
+                //TODO remove before submiting
             } else {
                 System.err.println("player already spawned");
             }
