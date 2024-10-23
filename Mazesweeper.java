@@ -72,7 +72,9 @@ public class Mazesweeper {
     public Mazesweeper() {
 
         // TODO SET RANDOM SEED IN DEBUG MENU
+        seed = -4963815611691238200L;
         randomGenerator = new Random(seed);
+        System.out.println(seed);
 
         this.maze = new Tile[10][10];
         this.frame = new JFrame("Mazesweeper");
@@ -567,6 +569,7 @@ public class Mazesweeper {
         private boolean isCleared = false; // player has been on this tile before
         private boolean isSelected = false;
         private boolean isMarked = false;
+        private boolean isOnShortestPath = false;
 
         private final Color mainColor;
 
@@ -589,12 +592,24 @@ public class Mazesweeper {
             return this.hasMine;
         }
     
-        public void plantMine() {
-            this.hasMine = true;
+        public void setHasMine(boolean hasMine) {
+            this.hasMine = hasMine;
         }
 
-        public void removeMine() {
-            this.hasMine = false;
+        public boolean getIsGoal() {
+            return this.isGoal;
+        }
+
+        public void setIsGoal(boolean isGoal) {
+            this.isGoal = isGoal;
+        }
+
+        public boolean getIsMarked() {
+            return this.isMarked;
+        }
+
+        public void setIsMarked(boolean isMarked) {
+            this.isMarked = isMarked;
         }
      
         @Override
@@ -616,6 +631,8 @@ public class Mazesweeper {
             } else if (this.isCleared && mainColor == DARK_GREEN) {
                 this.setBackground(DARK_BEIGE);
                 this.setBorder(BorderFactory.createEmptyBorder());
+            } else if (this.isOnShortestPath) {
+                this.setBackground(Color.WHITE);
             } else {
                 this.setBackground(mainColor);
             }
@@ -639,6 +656,25 @@ public class Mazesweeper {
             JLabel mineHint = new JLabel("" + mineNumber);
             mineHint.setVisible(true);
             this.add(mineHint);
+        }
+
+        /**
+         * Set the isCleared property of a tile without making a mine hint.
+         */
+        public void setIsCleared(boolean isCleared) {
+            this.isCleared = isCleared;
+        }
+
+        public boolean getIsCleared() {
+            return this.isCleared;
+        }
+
+        public void setIsOnShortestPath(boolean isOnShortestPath) {
+            this.isOnShortestPath = isOnShortestPath;
+        }
+
+        public boolean getIsOnShortestPath() {
+            return this.isOnShortestPath;
         }
 
         /**
@@ -674,8 +710,10 @@ public class Mazesweeper {
             if (SwingUtilities.isLeftMouseButton(e) && player == null) {
                 player = new Player(new Point(this.row, this.col));
                 this.hasPlayer = true;
-                // Place the mines and the goal.
-                MazeGeneration.generateMaze(maze, player.currentLocation);
+                // Place the mines and the goal. TODO: generation method select
+                MazeGenerator mazeGenerator 
+                    = new MazeGenerator(maze, player.currentLocation, randomGenerator);
+                mazeGenerator.generateMaze();
 
             } else if (SwingUtilities.isRightMouseButton(e)) { //TODO remove: right click spawns mine for debug
                 this.hasMine = true;
