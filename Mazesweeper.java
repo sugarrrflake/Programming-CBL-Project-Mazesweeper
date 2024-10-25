@@ -59,7 +59,7 @@ public class Mazesweeper {
     public static final Color DARK_BEIGE = new Color(216, 214, 119);
 
     private Random randomGenerator = new Random();
-    private final long seed = randomGenerator.nextLong();
+    private long seed = randomGenerator.nextLong();
 
     /**
      * Constructor for the main Mazesweeper game.
@@ -241,9 +241,7 @@ public class Mazesweeper {
 
         maze[player.oldLocation.x][player.oldLocation.y].hasPlayer = false;
         maze[player.currentLocation.x][player.currentLocation.y].hasPlayer = true;
-        if (!maze[player.currentLocation.x][player.currentLocation.y].isCleared) {
-            maze[player.currentLocation.x][player.currentLocation.y].clearTile();
-        }
+        maze[player.currentLocation.x][player.currentLocation.y].clearTile();
 
         maze[player.oldLocation.x][player.oldLocation.y].repaint();
         maze[player.currentLocation.x][player.currentLocation.y].repaint();
@@ -478,11 +476,17 @@ public class Mazesweeper {
                         col.hasMine = false;
                         col.isSelected = false;
                         col.isMarked = false;
-                        if (!col.isCleared) {
-                            col.clearTile();
-                        }
-
+                        col.clearTile();
                         col.repaint();
+
+                        //Clear the tiles around it again to update the mine hints
+                        for (int i = col.row - 1; i <= col.row + 1; i++) {
+                            for (int j = col.col - 1; j <= col.col + 1; j++) {
+                                if (maze[i][j].isCleared) {
+                                    maze[i][j].clearTile();
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -509,9 +513,7 @@ public class Mazesweeper {
                                 tile.isCleared = false;
                             } else {
                                 tile.isMarked = false;
-                                if (!tile.isCleared) {
-                                    tile.clearTile();
-                                }
+                                tile.clearTile();
                             }
                             tile.repaint();
                         } catch (java.lang.ArrayIndexOutOfBoundsException exception) { 
@@ -571,7 +573,24 @@ public class Mazesweeper {
 
                         col.repaint();
                         tile2.repaint();
-                        //TODO pick random clear tile, otherwise pick random !hasMine tile
+                        
+                        //Clear the tiles around it again to update the mine hints
+                        for (int i = col.row - 1; i <= col.row + 1; i++) {
+                            for (int j = col.col - 1; j <= col.col + 1; j++) {
+                                if (maze[i][j].isCleared) {
+                                    maze[i][j].clearTile();
+                                }
+                            }
+                        }
+
+                        //Clear the tiles around it again to update the mine hints
+                        for (int i = tile2.row - 1; i <= tile2.row + 1; i++) {
+                            for (int j = tile2.col - 1; j <= tile2.col + 1; j++) {
+                                if (maze[i][j].isCleared) {
+                                    maze[i][j].clearTile();
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -625,6 +644,7 @@ public class Mazesweeper {
         private boolean isSelected = false;
         private boolean isMarked = false;
         private boolean isOnShortestPath = false;
+        JLabel mineHint = new JLabel();
 
         private final Color mainColor;
 
@@ -641,6 +661,10 @@ public class Mazesweeper {
             this.col = col;
             this.mainColor = mainColor;
             this.addMouseListener(this);
+            
+            this.mineHint.setFont(new Font("Sans_Serif", Font.BOLD, TILE_SIZE / 2));
+            this.mineHint.setVisible(true);
+            this.add(this.mineHint);
         }
     
         public boolean getHasMine() {
@@ -708,10 +732,7 @@ public class Mazesweeper {
                     }
                 }
             }
-            JLabel mineHint = new JLabel("" + mineNumber);
-            mineHint.setFont(new Font("Sans_Serif", Font.BOLD, TILE_SIZE / 2));
-            mineHint.setVisible(true);
-            this.add(mineHint);
+            this.mineHint.setText("" + mineNumber);
         }
 
         /**
