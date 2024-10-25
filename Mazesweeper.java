@@ -68,7 +68,7 @@ public class Mazesweeper {
     public Mazesweeper() {
 
         // TODO SET RANDOM SEED IN DEBUG MENU
-        seed = -4963815611691238200L;
+        //seed = -4963815611691238200L;
         randomGenerator = new Random(seed);
         System.out.println(seed);
 
