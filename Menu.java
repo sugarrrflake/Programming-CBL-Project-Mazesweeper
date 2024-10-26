@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.JButton;
@@ -34,21 +35,22 @@ public class Menu {
     GridBagConstraints constraints = new GridBagConstraints();
 
     // Variables for scaling with screen size
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    public static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    // frame size compared to the screen size. Default: 0.625f
+    public static float screenSizeMultiplier = 0.625f; 
     // frame dimensions depending on screen size
-    float screenSizeMultiplier = 0.625f; // frame size compared to the screen size. Default: 0.625f
-    int frameWidth = (int) Math.round(screenSize.getWidth() * screenSizeMultiplier);
-    int frameHeight = (int) Math.round(screenSize.getHeight() * screenSizeMultiplier);
+    public static int frameWidth = (int) Math.round(screenSize.getWidth() * screenSizeMultiplier);
+    public static int frameHeight = (int) Math.round(screenSize.getHeight() * screenSizeMultiplier);
     // button dimensions depending on screen size
-    int buttonWidth = (int) Math.round(screenSize.getWidth() * screenSizeMultiplier * 0.15);
-    int buttonHeight = (int) Math.round(screenSize.getHeight() * screenSizeMultiplier * 0.06);
-    Dimension buttonDimension = new Dimension(buttonWidth, buttonHeight);
-    int buttonFontSize = (int) Math.round(buttonWidth / 12);
+    static int buttonWidth = (int) Math.round(screenSize.getWidth() * screenSizeMultiplier * 0.15);
+    static int buttonHeight = (int) Math.round(screenSize.getHeight() * screenSizeMultiplier * 0.06);
+    public static Dimension buttonDimension = new Dimension(buttonWidth, buttonHeight);
+    public static int buttonFontSize = (int) Math.round(buttonWidth / 12);
     // amount of pixels between buttons depending on screen size
-    int topInset = (int) Math.round(240 * screenSizeMultiplier);
-    int leftInset = (int) Math.round(16 * screenSizeMultiplier);
-    int bottomInset = (int) Math.round(16 * screenSizeMultiplier);
-    int rightInset = (int) Math.round(16 * screenSizeMultiplier);
+    public static int topInset = (int) Math.round(240 * screenSizeMultiplier);
+    public static int leftInset = (int) Math.round(16 * screenSizeMultiplier);
+    public static int bottomInset = (int) Math.round(16 * screenSizeMultiplier);
+    public static int rightInset = (int) Math.round(16 * screenSizeMultiplier);
 
     /**
      * Sets up the start menu screen.
@@ -57,7 +59,7 @@ public class Menu {
 
         // Setup of background image
         try {
-            final Image MazesweeperBackground = javax.imageio.ImageIO.read(new File("Mazesweeper.png"));
+            final Image MazesweeperBackground = ImageIO.read(new File("Mazesweeper.png"));
             BackgroundPanel backgroundPanel = new BackgroundPanel(MazesweeperBackground, frame);
             frame.setContentPane(backgroundPanel);
         } catch (IOException e) {
@@ -73,9 +75,6 @@ public class Menu {
         int frameX = (screenSize.width - frameWidth) / 2;
         int frameY = (screenSize.height - frameHeight) / 2;
         frame.setLocation(frameX, frameY);
-        //label.setSize(frame.getSize());
-        //frame.setContentPane(label);
-        //frame.getContentPane().setBackground(Mazesweeper.DARK_GREEN);
 
         // GridBagConstraint config.
         constraints.insets = new Insets(topInset, leftInset, bottomInset, rightInset);
@@ -165,7 +164,7 @@ class StartButtonEventHandler implements ActionListener {
 
             Menu.hideFrame();
 
-            Mazesweeper game = new Mazesweeper();
+            SettingsScreen settings = new SettingsScreen();
             
         });
     }
