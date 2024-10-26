@@ -14,10 +14,21 @@ public class MazeGenerator {
     Point goalTile;
 
     //settings
-    int amountOfMines = 30;
-    int minimumPathLength = 20;
+    int amountOfMines = 25;
+    int minimumPathLength = 15;
     boolean showMines = false;
     boolean showShortestPath = false;
+
+    // <= 10: 70 | <= 15: 55 | <= 20: 50 | <= 25 : 45 | <= 30: 40
+    /* 
+     * very easy: 10 mines, length 0 
+     * easy: 10 mines, length 10
+     * medium: 25 mines, length 15
+     * hard: 30 mines, length 20 
+     * very hard: 40 mines, length 20
+     * stupidly hard: 40 mines, length 30
+     * The real difficulty comes from not using items! All of these are easy with the radar.
+     */
 
     /**
      * Constructor for the MazeGenerator.
@@ -37,16 +48,40 @@ public class MazeGenerator {
      * Generates a goal tile, mines and a 3x3 spawn area around the given player location in the 
      * given grid using the given Random.
      */
-    void generateMaze() {
+    void generateMaze(int difficultyLevel) {
 
-        /*
-         * TODO:
-         * 3x3 area | done
-         * put goal | done
-         * 
-         * generate maze
-         * solve maze
-         */
+        //set amount of mines and path length according to difficulty level
+        switch (difficultyLevel) {
+            case 1:
+                this.amountOfMines = 10;
+                this.minimumPathLength = 0;
+                break;
+            case 2:
+                this.amountOfMines = 10;
+                this.minimumPathLength = 10;
+                break;
+            case 3:
+                this.amountOfMines = 25;
+                this.minimumPathLength = 15;
+                break;
+            case 4:
+                this.amountOfMines = 30;
+                this.minimumPathLength = 20;
+                break;
+            case 5:
+                this.amountOfMines = 40;
+                this.minimumPathLength = 20;
+                break;
+            case 6:
+                this.amountOfMines = 40;
+                this.minimumPathLength = 30;
+                break;
+            default:
+                System.out.println("Difficulty out of bounds (somehow)"); //not possible I think
+                break;
+        }  
+        System.out.println("difficulty " + difficultyLevel + ", "  
+            + amountOfMines  + " mines, " + "minimum path length " + minimumPathLength);
 
         // Go through tiles in 3x3 area around player 
         for (int i = playerLocation.x - 1; i <= playerLocation.x + 1; i++) {
@@ -79,12 +114,13 @@ public class MazeGenerator {
         maze[goalX][goalY].setIsGoal(true);
         maze[goalX][goalY].repaint();
 
-        
-        //TODO method
+        int pathLength; // solveIt() returns length of path to goal
         do {
             removeMines();
             distributeMines(amountOfMines);
-        } while (solveIt() <= minimumPathLength); // solveIt() returns length of path to goal
+            pathLength = solveIt();
+        } while (pathLength <= minimumPathLength);
+        System.out.println(pathLength + " steps to goal");
 
         for (Mazesweeper.Tile tile : Mazesweeper.Tile.getClearedTiles(maze)) {
             tile.clearTile();
@@ -199,11 +235,10 @@ public class MazeGenerator {
 
 
         if (hasSolution) {
-            System.out.println("distance to goal: " + tileDistances.get(maze[goalTile.x][goalTile.y]));
+            //System.out.println("distance to goal: " + tileDistances.get(maze[goalTile.x][goalTile.y]));
             showShortestPath(this.goalTile, tileDistances);
             return tileDistances.get(maze[goalTile.x][goalTile.y]);
         } else {
-            System.out.println("no solution, regenerating maze");
             return -1;
         }
     }

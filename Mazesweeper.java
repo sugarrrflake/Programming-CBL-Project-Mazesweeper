@@ -58,22 +58,21 @@ public class Mazesweeper {
     public static final Color LIGHT_BEIGE = new Color(231, 229, 131);
     public static final Color DARK_BEIGE = new Color(216, 214, 119);
 
-    private Random randomGenerator = new Random();
-    private long seed = randomGenerator.nextLong();
+    static Random randomGenerator = new Random();
+    int difficultyLevel;
 
     /**
      * Constructor for the main Mazesweeper game.
      * Initializing the game with an empty "maze".
      */
-    public Mazesweeper() {
+    public Mazesweeper(long seed, int difficultyLevel) {
 
-        // TODO SET RANDOM SEED IN DEBUG MENU
-        //seed = -4963815611691238200L;
+        this.difficultyLevel = difficultyLevel;
         randomGenerator = new Random(seed);
-        System.out.println(seed);
+        System.out.println("seed: " + seed);
 
         this.maze = new Tile[10][10];
-        this.frame = new JFrame("Mazesweeper");
+        this.frame = new JFrame("Mazesweeper" + " | " + "seed: " + Long.toString(seed));
 
         this.moveUp = new MoveUp();
         this.moveDown = new MoveDown();
@@ -125,6 +124,7 @@ public class Mazesweeper {
         inventoryPanel.add(swapperUI);
 
         frame.add(inventoryPanel);
+
 
         JPanel mazePanel = new JPanel();
         mazePanel.setSize(TILE_SIZE * 10, TILE_SIZE * 10);
@@ -248,6 +248,19 @@ public class Mazesweeper {
         
         // if the player stepped on a mine, display the game over screen
         if (maze[player.currentLocation.x][player.currentLocation.y].hasMine) {
+
+            // show all the mines
+            for (Tile[] row : maze) {
+                for (Tile col : row) {
+                    if (col.hasMine) {
+                        col.isMarked = true;
+                    } else {
+                        col.isMarked = false;
+                    }
+                    col.repaint();
+                }
+            }
+
             JDialog gameOver = new JDialog(frame, "Game Over!", Dialog.ModalityType.DOCUMENT_MODAL);
 
             int overWidth = SCREEN_DIMENSION.width / 5;
@@ -282,6 +295,19 @@ public class Mazesweeper {
 
         //if the player reached the goal, display the victory screen
         if (maze[player.currentLocation.x][player.currentLocation.y].isGoal) {
+
+            // show all the mines
+            for (Tile[] row : maze) {
+                for (Tile col : row) {
+                    if (col.hasMine) {
+                        col.isMarked = true;
+                    } else {
+                        col.isMarked = false;
+                    }
+                    col.repaint();
+                }
+            }
+
             JDialog victory = new JDialog(frame, "Victory!", Dialog.ModalityType.DOCUMENT_MODAL);
 
             int overWidth = SCREEN_DIMENSION.width / 5;
@@ -482,7 +508,8 @@ public class Mazesweeper {
                         //Clear the tiles around it again to update the mine hints
                         for (int i = col.row - 1; i <= col.row + 1; i++) {
                             for (int j = col.col - 1; j <= col.col + 1; j++) {
-                                if (maze[i][j].isCleared) {
+                                //check if tile is in bounds and whether it's cleared
+                                if (i >= 0 && i < 10 && j >= 0 && j < 10 && maze[i][j].isCleared) {
                                     maze[i][j].clearTile();
                                 }
                             }
@@ -559,7 +586,8 @@ public class Mazesweeper {
                                 col2 = randomGenerator.nextInt(10);
                                 tile2 = maze[row2][col2];
                             }
-                        } while (tile2.hasMine == col.hasMine || tile2.hasPlayer); 
+                        // make sure the tile doesn't have the player, isn't the goal.
+                        } while (tile2.hasMine == col.hasMine || tile2.hasPlayer || tile2.isGoal); 
 
                         player.hasSwapper = false; // use up swapper
                         col.isSelected = false;
@@ -577,16 +605,18 @@ public class Mazesweeper {
                         //Clear the tiles around it again to update the mine hints
                         for (int i = col.row - 1; i <= col.row + 1; i++) {
                             for (int j = col.col - 1; j <= col.col + 1; j++) {
-                                if (maze[i][j].isCleared) {
+                                //check if tile is in bounds and whether it's cleared
+                                if (i >= 0 && i < 10 && j >= 0 && j < 10 && maze[i][j].isCleared) {
                                     maze[i][j].clearTile();
                                 }
                             }
                         }
 
-                        //Clear the tiles around it again to update the mine hints
+                        //Clear the tiles around the other tile again to update the mine hints
                         for (int i = tile2.row - 1; i <= tile2.row + 1; i++) {
                             for (int j = tile2.col - 1; j <= tile2.col + 1; j++) {
-                                if (maze[i][j].isCleared) {
+                                //check if tile is in bounds and whether it's cleared
+                                if (i >= 0 && i < 10 && j >= 0 && j < 10 && maze[i][j].isCleared) {
                                     maze[i][j].clearTile();
                                 }
                             }
@@ -790,11 +820,12 @@ public class Mazesweeper {
                 // Place the mines and the goal. TODO: generation method select
                 MazeGenerator mazeGenerator 
                     = new MazeGenerator(maze, player.currentLocation, randomGenerator);
-                mazeGenerator.generateMaze();
+                mazeGenerator.generateMaze(difficultyLevel);
 
-            } else if (SwingUtilities.isRightMouseButton(e)) { //TODO remove: right click spawns mine for debug
-                this.hasMine = true;
-                //TODO remove before submiting
+            /*} else if (SwingUtilities.isRightMouseButton(e)) { 
+                //TODO remove: right click spawns mine for debug
+                //this.hasMine = true;
+                //TODO remove before submiting */
             } else {
                 System.err.println("player already spawned");
             }
