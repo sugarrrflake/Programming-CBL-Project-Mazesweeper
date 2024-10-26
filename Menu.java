@@ -60,9 +60,8 @@ public class Menu {
             final Image MazesweeperBackground = javax.imageio.ImageIO.read(new File("Mazesweeper.png"));
             BackgroundPanel backgroundPanel = new BackgroundPanel(MazesweeperBackground, frame);
             frame.setContentPane(backgroundPanel);
-        // The line where it reads the file really wants IOException to be handled
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
         // frame init
@@ -71,6 +70,9 @@ public class Menu {
         frame.setSize(frameWidth, frameHeight);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
+        int frameX = (screenSize.width - frameWidth) / 2;
+        int frameY = (screenSize.height - frameHeight) / 2;
+        frame.setLocation(frameX, frameY);
         //label.setSize(frame.getSize());
         //frame.setContentPane(label);
         //frame.getContentPane().setBackground(Mazesweeper.DARK_GREEN);

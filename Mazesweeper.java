@@ -487,11 +487,12 @@ public class Mazesweeper {
                                 }
                             }
                         }
+
+                        defuserUI.setText("Defuser has been used!");
+                        defuserUI.setForeground(Color.RED);
                     }
                 }
             }
-            defuserUI.setText("Defuser has been used up!");
-            defuserUI.setForeground(Color.RED);
         }
     }
 
@@ -523,7 +524,7 @@ public class Mazesweeper {
                 }
                 player.hasRadar = false; // only have one radar which gets used up
             }
-            radarUI.setText("Radar has been used up!");
+            radarUI.setText("Radar has been used!");
             radarUI.setForeground(Color.RED);
         }
     }
@@ -591,11 +592,12 @@ public class Mazesweeper {
                                 }
                             }
                         }
+
+                        swapperUI.setText("Swapper has been used!");
+                        swapperUI.setForeground(Color.RED);
                     }
                 }
             }
-            swapperUI.setText("Swapper has been used up!");
-            swapperUI.setForeground(Color.RED);
         }
     }
 
