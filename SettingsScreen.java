@@ -37,8 +37,8 @@ public class SettingsScreen {
         // frame init
 
         //sets window size relative to user's screen size
-        int frameWidth = Menu.frameWidth / 2;
-        int frameHeight = Menu.frameHeight / 5;
+        int frameWidth = Menu.SCREEN_SIZE.width / 2;
+        int frameHeight = Menu.SCREEN_SIZE.height / 5;
         frame.setSize(frameWidth, frameHeight);
         int frameX = (Menu.SCREEN_SIZE.width - frameWidth) / 2;
         int frameY = (Menu.SCREEN_SIZE.height - frameHeight) / 2;
