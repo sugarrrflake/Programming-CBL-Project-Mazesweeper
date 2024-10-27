@@ -10,9 +10,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -21,36 +21,45 @@ import javax.swing.SwingUtilities;
 
 /**
  * Menu class handles the menu screen that is shown when the program is run.
+ * 
+ * @author Gunnar Johansson
+ * @ID 2146444
+ * @author Adam Bekesi
+ * @ID 2147548
  */
 public class Menu {
 
-    private static JFrame frame = new JFrame("Mazesweeper Startup"); 
+    private static final JFrame FRAME = new JFrame("Mazesweeper | Startup"); 
 
     // button ActionListeners
     StartButtonEventHandler startListener = new StartButtonEventHandler();
-    RulesButtonEventHandler rulesListener = new RulesButtonEventHandler();
+    // RulesButtonEventHandler rulesListener = new RulesButtonEventHandler();
     QuitButtonEventHandler quitListener = new QuitButtonEventHandler();
 
     // button layout constraints. Used to configure the layout manager.
     GridBagConstraints constraints = new GridBagConstraints();
 
     // Variables for scaling with screen size
-    public static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    public static final Dimension SCREEN_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
     // frame size compared to the screen size. Default: 0.625f
-    public static float screenSizeMultiplier = 0.625f; 
+    public static final float SCREEN_SIZE_MULTIPLIER = 0.625f; 
     // frame dimensions depending on screen size
-    public static int frameWidth = (int) Math.round(screenSize.getWidth() * screenSizeMultiplier);
-    public static int frameHeight = (int) Math.round(screenSize.getHeight() * screenSizeMultiplier);
+    public static int frameWidth =
+        (int) Math.round(SCREEN_SIZE.getWidth() * SCREEN_SIZE_MULTIPLIER);
+    public static int frameHeight =
+        (int) Math.round(SCREEN_SIZE.getHeight() * SCREEN_SIZE_MULTIPLIER);
     // button dimensions depending on screen size
-    static int buttonWidth = (int) Math.round(screenSize.getWidth() * screenSizeMultiplier * 0.15);
-    static int buttonHeight = (int) Math.round(screenSize.getHeight() * screenSizeMultiplier * 0.06);
-    public static Dimension buttonDimension = new Dimension(buttonWidth, buttonHeight);
-    public static int buttonFontSize = (int) Math.round(buttonWidth / 12);
+    static final int BUTTON_WIDTH =
+        (int) Math.round(SCREEN_SIZE.getWidth() * SCREEN_SIZE_MULTIPLIER * 0.15);
+    static final int BUTTON_HEIGHT =
+        (int) Math.round(SCREEN_SIZE.getHeight() * SCREEN_SIZE_MULTIPLIER * 0.06);
+    public static Dimension buttonDimension = new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT);
+    public static int buttonFontSize = (int) Math.round(BUTTON_WIDTH / 12);
     // amount of pixels between buttons depending on screen size
-    public static int topInset = (int) Math.round(240 * screenSizeMultiplier);
-    public static int leftInset = (int) Math.round(16 * screenSizeMultiplier);
-    public static int bottomInset = (int) Math.round(16 * screenSizeMultiplier);
-    public static int rightInset = (int) Math.round(16 * screenSizeMultiplier);
+    public static int topInset = (int) Math.round(240 * SCREEN_SIZE_MULTIPLIER);
+    public static int leftInset = (int) Math.round(16 * SCREEN_SIZE_MULTIPLIER);
+    public static int bottomInset = (int) Math.round(16 * SCREEN_SIZE_MULTIPLIER);
+    public static int rightInset = (int) Math.round(16 * SCREEN_SIZE_MULTIPLIER);
 
     /**
      * Sets up the start menu screen.
@@ -60,21 +69,22 @@ public class Menu {
         // Setup of background image
         try {
             final Image MazesweeperBackground = ImageIO.read(new File("Mazesweeper.png"));
-            BackgroundPanel backgroundPanel = new BackgroundPanel(MazesweeperBackground, frame);
-            frame.setContentPane(backgroundPanel);
+            BackgroundPanel backgroundPanel = new BackgroundPanel(MazesweeperBackground, FRAME);
+            FRAME.setContentPane(backgroundPanel);
         } catch (IOException e) {
+            System.err.println("ERROR: MISSING MAIN MENU BACKGROUND IMAGE!");
             e.printStackTrace();
         }
 
         // frame init
-        frame.setLayout(new GridBagLayout());
+        FRAME.setLayout(new GridBagLayout());
         //sets window size relative to user's screen size
-        frame.setSize(frameWidth, frameHeight);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setResizable(false);
-        int frameX = (screenSize.width - frameWidth) / 2;
-        int frameY = (screenSize.height - frameHeight) / 2;
-        frame.setLocation(frameX, frameY);
+        FRAME.setSize(frameWidth, frameHeight);
+        FRAME.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        FRAME.setResizable(false);
+        int frameX = (SCREEN_SIZE.width - frameWidth) / 2;
+        int frameY = (SCREEN_SIZE.height - frameHeight) / 2;
+        FRAME.setLocation(frameX, frameY);
 
         // GridBagConstraint config.
         constraints.insets = new Insets(topInset, leftInset, bottomInset, rightInset);
@@ -88,19 +98,10 @@ public class Menu {
         startButton.setFont(new Font("Dialog", Font.BOLD, buttonFontSize));
         // mouselistener for changing colour when hovering over it
         startButton.addMouseListener(new ButtonMouseListener(startButton));
-        frame.add(startButton, constraints);
+        FRAME.add(startButton, constraints);
 
-        // rules button init
-        JButton rulesButton = new JButton("HOW TO PLAY");
-        rulesButton.setBackground(Mazesweeper.LIGHT_BEIGE);
-        rulesButton.addActionListener(rulesListener);
-        rulesButton.setPreferredSize(buttonDimension);
-        rulesButton.setFont(new Font("Dialog", Font.BOLD, buttonFontSize));
         constraints.insets.top = bottomInset; // sets top inset to be same as other insets
-        constraints.gridy = 1; // gridy of start button is 0, rules button is 1 lower
-        // mouselistener for changing colour when hovering over it
-        rulesButton.addMouseListener(new ButtonMouseListener(rulesButton));
-        frame.add(rulesButton, constraints);
+
 
         // quit button init
         JButton quitButton = new JButton("QUIT");
@@ -111,18 +112,18 @@ public class Menu {
         constraints.gridy = 2; // gridy of rules button is 1, quit button is 1 lower
         // mouselistener for changing colour when hovering over it
         quitButton.addMouseListener(new ButtonMouseListener(quitButton));
-        frame.add(quitButton, constraints);
+        FRAME.add(quitButton, constraints);
 
-        frame.setVisible(true);
+        FRAME.setVisible(true);
     }
 
 
     public static void hideFrame() {
-        frame.setVisible(false);
+        FRAME.setVisible(false);
     }
     
     public static void showFrame() {
-        frame.setVisible(true);
+        FRAME.setVisible(true);
     }
 
     public static void main(String[] args) {
@@ -136,8 +137,8 @@ public class Menu {
 
 class BackgroundPanel extends JPanel {
 
-    private Image backgroundImage;
-    private JFrame frame;
+    private final Image backgroundImage;
+    private final JFrame frame;
 
     /**
      * Constructor, to access host frame properties and the image being used.
@@ -160,23 +161,11 @@ class StartButtonEventHandler implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        SwingUtilities.invokeLater(() -> {
 
-            Menu.hideFrame();
+        Menu.hideFrame();
 
-            SettingsScreen settings = new SettingsScreen();
-            
-        });
-    }
-}
+        SettingsScreen settings = new SettingsScreen();
 
-// show rules screen when "how to play" is pressed
-class RulesButtonEventHandler implements ActionListener {
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        //TODO add rules screen
-        System.out.println("The button works!");
     }
 }
 
@@ -191,7 +180,7 @@ class QuitButtonEventHandler implements ActionListener {
 
 class ButtonMouseListener implements MouseListener {
     
-    private JButton button;
+    private final JButton button;
 
     ButtonMouseListener(JButton button) {
         this.button = button;
@@ -208,20 +197,11 @@ class ButtonMouseListener implements MouseListener {
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-        // TODO Auto-generated method stub
-        
-    }
+    public void mouseClicked(MouseEvent e) {}
 
     @Override
-    public void mousePressed(MouseEvent e) {
-        // TODO Auto-generated method stub
-        
-    }
+    public void mousePressed(MouseEvent e) {}
 
     @Override
-    public void mouseReleased(MouseEvent e) {
-        // TODO Auto-generated method stub
-        
-    }
+    public void mouseReleased(MouseEvent e) {}
 }

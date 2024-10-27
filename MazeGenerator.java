@@ -5,6 +5,11 @@ import java.util.Random;
 
 /**
  * Class that handles the generation the layout of mines on a Mazesweeper board.
+ * 
+ * @author Gunnar Johansson
+ * @ID 2146444
+ * @author Adam Bekesi
+ * @ID 2147548
  */
 public class MazeGenerator {
     
@@ -14,24 +19,15 @@ public class MazeGenerator {
     Point goalTile;
 
     //settings
-    int amountOfMines = 25;
-    int minimumPathLength = 15;
+    int amountOfMines = 25; // can only be set here if doDifficulty is false
+    int minimumPathLength = 15; // can only be set here if doDifficulty is false
+    boolean doDifficulty = true; // set to false for debug
     boolean showMines = false;
     boolean showShortestPath = false;
 
-    // <= 10: 70 | <= 15: 55 | <= 20: 50 | <= 25 : 45 | <= 30: 40
-    /* 
-     * very easy: 10 mines, length 0 
-     * easy: 10 mines, length 10
-     * medium: 25 mines, length 15
-     * hard: 30 mines, length 20 
-     * very hard: 40 mines, length 20
-     * stupidly hard: 40 mines, length 30
-     * The real difficulty comes from not using items! All of these are easy with the radar.
-     */
-
     /**
      * Constructor for the MazeGenerator.
+     * 
      * @param maze the game grid
      * @param playerLocation the spawn location of the player
      * @param randomGenerator the Random object to use for seeded generation
@@ -51,36 +47,33 @@ public class MazeGenerator {
     void generateMaze(int difficultyLevel) {
 
         //set amount of mines and path length according to difficulty level
-        switch (difficultyLevel) {
-            case 1:
-                this.amountOfMines = 10;
-                this.minimumPathLength = 0;
-                break;
-            case 2:
-                this.amountOfMines = 10;
-                this.minimumPathLength = 10;
-                break;
-            case 3:
-                this.amountOfMines = 25;
-                this.minimumPathLength = 15;
-                break;
-            case 4:
-                this.amountOfMines = 30;
-                this.minimumPathLength = 20;
-                break;
-            case 5:
-                this.amountOfMines = 40;
-                this.minimumPathLength = 20;
-                break;
-            case 6:
-                this.amountOfMines = 40;
-                this.minimumPathLength = 30;
-                break;
-            default:
-                System.out.println("Difficulty out of bounds (somehow)"); //not possible I think
-                break;
-        }  
-        System.out.println("difficulty " + difficultyLevel + ", "  
+        if (doDifficulty) {
+            switch (difficultyLevel) {
+                case 1 -> {
+                    this.amountOfMines = 10;
+                    this.minimumPathLength = 0;
+                }
+                case 2 -> {
+                    this.amountOfMines = 10;
+                    this.minimumPathLength = 10;
+                }
+                case 3 -> {
+                    this.amountOfMines = 25;
+                    this.minimumPathLength = 15;
+                }
+                case 4 -> {
+                    this.amountOfMines = 30;
+                    this.minimumPathLength = 20;
+                }
+                case 5 -> {
+                    this.amountOfMines = 40;
+                    this.minimumPathLength = 20;
+                }
+                default ->
+                    System.out.println("Difficulty out of bounds (somehow)"); //not possible I think
+            }  
+        }
+        System.out.println("difficulty " + difficultyLevel + ", "  // print settings to console
             + amountOfMines  + " mines, " + "minimum path length " + minimumPathLength);
 
         // Go through tiles in 3x3 area around player 
@@ -116,12 +109,14 @@ public class MazeGenerator {
 
         int pathLength; // solveIt() returns length of path to goal
         do {
-            removeMines();
-            distributeMines(amountOfMines);
-            pathLength = solveIt();
-        } while (pathLength <= minimumPathLength);
+            removeMines(); // reset the board
+            distributeMines(amountOfMines); // generate a maze
+            pathLength = solveIt(); // get the shortest path to the goal
+        // regenerate maze if there is no solution (or the solution is too easy)
+        } while (pathLength <= minimumPathLength); 
         System.out.println(pathLength + " steps to goal");
 
+        // re-clear the starting tiles to update the mine hints
         for (Mazesweeper.Tile tile : Mazesweeper.Tile.getClearedTiles(maze)) {
             tile.clearTile();
             tile.repaint();
@@ -131,11 +126,9 @@ public class MazeGenerator {
     private void removeMines() {
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
-                if (maze[i][j].getHasMine()) {
-                    maze[i][j].setHasMine(false);
-                    maze[i][j].setIsMarked(false);
-                    maze[i][j].repaint();
-                }
+                maze[i][j].setHasMine(false);
+                maze[i][j].setIsMarked(false);
+                maze[i][j].repaint();
             }
         }
     }
@@ -166,7 +159,7 @@ public class MazeGenerator {
 
         // loop that gets the minimum amount of moves it takes to get to each tile on the board
         // minimum amount of moves is called "distance" from here on out
-        while (uncheckedTiles.size() > 0) {
+        while (!uncheckedTiles.isEmpty()) {
             Point tilePoint = uncheckedTiles.get(0);
             tile = maze[tilePoint.x][tilePoint.y];
             distance = tileDistances.get(tile);
@@ -235,15 +228,17 @@ public class MazeGenerator {
 
 
         if (hasSolution) {
-            //System.out.println("distance to goal: " + tileDistances.get(maze[goalTile.x][goalTile.y]));
             showShortestPath(this.goalTile, tileDistances);
-            return tileDistances.get(maze[goalTile.x][goalTile.y]);
+            return tileDistances.get(maze[goalTile.x][goalTile.y]); // returns path length to goal
         } else {
-            return -1;
+            return -1; // -1 is always shorter than minimum path length, so the maze is regenerated
         }
     }
 
-
+    /**
+     * Makes sure the tile is not a mine, and checks whether the new found path to it is shorter
+     * than the old one.
+     */
     private boolean checkTile(Mazesweeper.Tile tileToCheck, Point tilePoint, 
         HashMap<Mazesweeper.Tile, Integer> tileDistances) {
         
@@ -251,20 +246,23 @@ public class MazeGenerator {
         int distance = tileDistances.get(maze[tilePoint.x][tilePoint.y]);
 
         // if the tile being checked does not have a mine
-        if (!tileToCheck.getHasMine()) {
-            // and it doesn't have a distance assigned yet or if this is a shorter path
-            if (!tileDistances.containsKey(tileToCheck) 
-                || distance + 1 < tileDistances.get(tileToCheck)) {
-
-                return true;
-            } 
-        }
+        // and it doesn't have a distance assigned yet or if this is a shorter path
+        if (!tileToCheck.getHasMine() && (!tileDistances.containsKey(tileToCheck) 
+            || distance + 1 < tileDistances.get(tileToCheck))) {
+            return true;
+        } 
         return false;
     }
 
+    /**
+     * Finds which tiles are part of the shortest path to the goal. 
+     * Starts at the goal and works its way to the player.
+     * @return whether the tile is on the path. Works for recursion (similar to AmazingCase).
+     */
     private boolean showShortestPath(Point tilePoint, 
         HashMap<Mazesweeper.Tile, Integer> distances) {
             
+        // If the start of the path is found
         Mazesweeper.Tile tile = maze[tilePoint.x][tilePoint.y];
         if (distances.get(tile) == 0) {
             return true;
@@ -281,10 +279,11 @@ public class MazeGenerator {
                 Mazesweeper.Tile nextTile = maze[nextPoint.x][nextPoint.y];
 
                 //if this tile is on the shortest path (recursive) colour it white
-                if (distances.get(nextTile) != null
-                    && distances.get(nextTile) < distances.get(tile) 
-                    && showShortestPath(nextPoint, distances)) {
+                if (distances.get(nextTile) != null // if the next tile is reachable
+                    && distances.get(nextTile) < distances.get(tile) // and closer to the player
+                    && showShortestPath(nextPoint, distances)) { // recursion
 
+                    // Colour tile white if the showShortestPath debug setting is set to true
                     tile.setIsOnShortestPath(showShortestPath);
                     tile.repaint();
                     return true;

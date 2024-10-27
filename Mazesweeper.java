@@ -24,13 +24,17 @@ import javax.swing.WindowConstants;
 
 /**
  * Main class implementing the Mazesweeper game.
+ * 
+ * @author Gunnar Johansson
+ * @ID 2146444
+ * @author Adam Bekesi
+ * @ID 2147548
  */
 public class Mazesweeper {
  
     private final JFrame frame;
     private final Tile[][] maze;
     private Player player = null;
-    private Point goalLoaction = null;
 
     private final MoveUp moveUp;
     private final MoveDown moveDown;
@@ -44,11 +48,11 @@ public class Mazesweeper {
 
     private final MarkTile markTile;
     private final UseDefuser useDefuser;
-    private JLabel defuserUI;
+    private final JLabel defuserUI;
     private final UseRadar useRadar;
-    private JLabel radarUI;
+    private final JLabel radarUI;
     private final UseSwapper useSwapper;
-    private JLabel swapperUI;
+    private final JLabel swapperUI;
 
     public static final Dimension SCREEN_DIMENSION = Toolkit.getDefaultToolkit().getScreenSize();
     public static final int TILE_SIZE = SCREEN_DIMENSION.height / 15;
@@ -73,23 +77,28 @@ public class Mazesweeper {
 
         this.maze = new Tile[10][10];
         this.frame = new JFrame("Mazesweeper" + " | " + "seed: " + Long.toString(seed));
-
+        
+        // Initialise the movement handlers
         this.moveUp = new MoveUp();
         this.moveDown = new MoveDown();
         this.moveRight = new MoveRight();
         this.moveLeft = new MoveLeft();
 
+        // Initiate the tile selection handlers
         this.lookUp = new LookUp();
         this.lookDown = new LookDown();
         this.lookRight = new LookRight();
         this.lookLeft = new LookLeft();
 
+        // Initiate the marking and item handlers
         this.markTile = new MarkTile();
         this.useDefuser = new UseDefuser();
         this.useRadar = new UseRadar();
         this.useSwapper = new UseSwapper();
         
         frame.setLayout(null);
+        // Set the frame size and location dinamically
+        // in relationn to the screen size
         int frameWidth = (TILE_SIZE * 10) + 16;
         int frameHeight = (TILE_SIZE * 10) + 139;
         frame.setSize(frameWidth, frameHeight);
@@ -107,6 +116,7 @@ public class Mazesweeper {
 
         inventoryPanel.setLayout(new GridLayout(1, 3));
 
+        // show info about the items
         this.defuserUI = new JLabel("Press [1] to use Defuser");
         defuserUI.setFont(new Font("Sans_Serif", Font.BOLD, TILE_SIZE / 4));
         defuserUI.setForeground(Color.WHITE);
@@ -126,6 +136,7 @@ public class Mazesweeper {
         frame.add(inventoryPanel);
 
 
+        // initialisation of panel that hosts the board
         JPanel mazePanel = new JPanel();
         mazePanel.setSize(TILE_SIZE * 10, TILE_SIZE * 10);
         mazePanel.setLayout(new GridLayout(10, 10));
@@ -225,6 +236,7 @@ public class Mazesweeper {
         player.oldLocation = player.currentLocation;
         Point newLocation = null;
 
+        // move the player in the direction they pressed
         switch (direction) {
             case "UP" -> 
                 newLocation = new Point(player.currentLocation.x - 1, player.currentLocation.y);
@@ -252,11 +264,7 @@ public class Mazesweeper {
             // show all the mines
             for (Tile[] row : maze) {
                 for (Tile col : row) {
-                    if (col.hasMine) {
-                        col.isMarked = true;
-                    } else {
-                        col.isMarked = false;
-                    }
+                    col.isMarked = col.hasMine;
                     col.repaint();
                 }
             }
@@ -299,11 +307,7 @@ public class Mazesweeper {
             // show all the mines
             for (Tile[] row : maze) {
                 for (Tile col : row) {
-                    if (col.hasMine) {
-                        col.isMarked = true;
-                    } else {
-                        col.isMarked = false;
-                    }
+                    col.isMarked = col.hasMine;
                     col.repaint();
                 }
             }
@@ -348,9 +352,15 @@ public class Mazesweeper {
         }
     }
 
+    /**
+     * Selecting a tile in a given direction.
+     * 
+     * @param direction the direction the tile is from the player
+     */
     public void look(String direction) {
 
-        Point selectedTile = null;
+        // select the tile in the direction the player chose
+        Point selectedTile = new Point(0, 0);
         switch (direction) {
             case "UP" -> 
                 selectedTile = new Point(player.currentLocation.x - 1, player.currentLocation.y);
@@ -572,7 +582,7 @@ public class Mazesweeper {
                         Tile tile2;
                         do {
                             // If possible, we want to swap the mine tile with a cleared tile
-                            if (col.hasMine && clearTiles.size() > 0) {
+                            if (col.hasMine && !clearTiles.isEmpty()) {
                                 // Picks a random tile from the ArrayList of cleared tiles
                                 tile2 = clearTiles.get(randomGenerator.nextInt(clearTiles.size()));
 
@@ -630,36 +640,6 @@ public class Mazesweeper {
             }
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     /**
      * Class describing the tiles that make up the maze.
@@ -755,9 +735,12 @@ public class Mazesweeper {
         public void clearTile() {
             this.isCleared = true;
             int mineNumber = 0;
+            // loop through the tiles around the tile being cleared
             for (int i = row - 1; i <= row + 1; i++) {
                 for (int j = col - 1; j <= col + 1; j++) {
+                    // if they are in bounds
                     if ((i >= 0 && i < 10) && (j >= 0 && j < 10)) {
+                        // and have mines on them
                         if (maze[i][j].hasMine) {
                             mineNumber++;
                         }
@@ -819,15 +802,10 @@ public class Mazesweeper {
             if (SwingUtilities.isLeftMouseButton(e) && player == null) {
                 player = new Player(new Point(this.row, this.col));
                 this.hasPlayer = true;
-                // Place the mines and the goal. TODO: generation method select
+                // Place the mines and the goal.
                 MazeGenerator mazeGenerator 
                     = new MazeGenerator(maze, player.currentLocation, randomGenerator);
                 mazeGenerator.generateMaze(difficultyLevel);
-
-            /*} else if (SwingUtilities.isRightMouseButton(e)) { 
-                //TODO remove: right click spawns mine for debug
-                //this.hasMine = true;
-                //TODO remove before submiting */
             } else {
                 System.err.println("player already spawned");
             }
@@ -839,37 +817,6 @@ public class Mazesweeper {
         @Override
         public void mouseClicked(MouseEvent e) {}
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     /**
      * Class describing a player character.
